@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patreon Comment Extractor - Local</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 50px auto; 
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button { 
+            background: #ff6b35; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover { background: #e55a2d; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        input[type="url"] { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #ddd; 
+            border-radius: 5px; 
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .status { 
+            padding: 15px; 
+            margin: 15px 0; 
+            border-radius: 5px; 
+            display: none;
+        }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { 
+			background: linear-gradient(135deg, #f8d7da, #f5c6cb); 
+			color: #721c24; 
+			border: 1px solid #f5c6cb;
+			font-weight: 500;
+			line-height: 1.4;
+		}
+        .status.loading { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .comment { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+            border-left: 4px solid #ff6b35;
+        }
+        .comment-meta { 
+            font-size: 0.9em; 
+            color: #666; 
+            margin-top: 10px;
+        }
+		.comment-author {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .profile-image {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid #ddd;
+        }
+        .results { display: none; }
+        
+        /* Star Map Styles */
+        #star-map-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease, visibility 1s ease;
+        }
+        
+        #star-map-container.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .room-environment {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)),
+                url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAeACgDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAMBAgQF/8QAIhAAAgIBBAIDAAAAAAAAAAAAAgEDAAQRBRIhMQYTQVH/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A9VoooqGFFFFQooooqFFFFQooooqFFFFQooooqFFFFQooooqFFFFQooooqFFFFQv/2Q==');
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: multiply;
+            z-index: 1;
+        }
+        
+        .room-environment::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(30, 40, 60, 0.3) 0%, transparent 25%),
+                radial-gradient(circle at 80% 20%, rgba(40, 50, 70, 0.2) 0%, transparent 30%),
+                radial-gradient(circle at 60% 90%, rgba(25, 35, 50, 0.4) 0%, transparent 20%);
+            z-index: 1;
+        }
+        
+        .room-environment::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.6) 30%, transparent 100%);
+            z-index: 1;
+        }
+        
+        .podium {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 60px;
+            background: linear-gradient(to top, #1a1a2e, #2c2c54);
+            border-radius: 75px 75px 15px 15px;
+            z-index: 10;
+            box-shadow: 
+                0 0 30px rgba(0, 0, 0, 0.8),
+                inset 0 2px 10px rgba(255, 255, 255, 0.1);
+            border: 1px solid #333;
+        }
+        
+        .podium::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 10px;
+            background: linear-gradient(to right, transparent, #333, transparent);
+            border-radius: 50%;
+        }
+        
+        .orb {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(circle at 30% 30%, #87ceeb, #4682b4, #191970);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(70, 130, 180, 0.6);
+            z-index: 11;
+            opacity: 0.7;
+        }
+        
+        .orb.glowing {
+            animation: orb-activation 3s ease-in-out forwards;
+        }
+        
+        @keyframes orb-activation {
+            0% { 
+                transform: translateX(-50%) scale(1);
+                box-shadow: 0 0 15px rgba(70, 130, 180, 0.6);
+                opacity: 0.7;
+            }
+            30% { 
+                transform: translateX(-50%) scale(1.2);
+                box-shadow: 0 0 40px rgba(70, 130, 180, 0.9);
+                opacity: 1;
+            }
+            60% { 
+                transform: translateX(-50%) scale(1.5);
+                box-shadow: 0 0 80px rgba(255, 255, 255, 1);
+                opacity: 1;
+            }
+            80% { 
+                transform: translateX(-50%) scale(2);
+                box-shadow: 0 0 150px rgba(255, 255, 255, 1);
+                opacity: 0.8;
+            }
+            100% { 
+                transform: translateX(-50%) scale(0.8);
+                box-shadow: 0 0 25px rgba(70, 130, 180, 0.8);
+                opacity: 0.9;
+            }
+        }
+        
+        #hologram-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 5;
+            pointer-events: auto;
+            user-select: none;
+        }
+        
+        .hologram-projection {
+            position: absolute;
+            bottom: 11%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: 
+                radial-gradient(ellipse at center bottom, rgba(135, 206, 235, 0.05) 0%, rgba(135, 206, 235, 0.02) 40%, transparent 70%);
+            border-radius: 50%;
+            z-index: 2;
+            filter: blur(3px);
+            animation: projection-pulse 4s ease-in-out infinite;
+        }
+        
+        .hologram-grid {
+            display: none; /* Remove the crosshair grid */
+        }
+        
+        @keyframes projection-pulse {
+            0%, 100% { 
+                opacity: 0.4; 
+                transform: translateX(-50%) scale(1);
+                filter: blur(3px);
+            }
+            50% { 
+                opacity: 0.7; 
+                transform: translateX(-50%) scale(1.02);
+                filter: blur(2px);
+            }
+        }
+        
+        .flash-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(135,206,235,0.3) 40%, transparent 70%);
+            opacity: 0;
+            z-index: 8;
+            pointer-events: none;
+        }
+        
+        .flash-overlay.active {
+            animation: flash-burst 0.8s ease-out forwards;
+        }
+        
+        @keyframes flash-burst {
+            0% { opacity: 0; transform: scale(0.1); }
+            10% { opacity: 1; transform: scale(0.3); }
+            30% { opacity: 0.8; transform: scale(1.5); }
+            100% { opacity: 0; transform: scale(3); }
+        }
+        
+        .close-star-map {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 15;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .close-star-map:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .star-map-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            z-index: 15;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .star-map-info h3 {
+            margin: 0 0 10px 0;
+            color: #87ceeb;
+        }
+        
+        .star-map-info p {
+            margin: 5px 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .galaxy-tips {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(135, 206, 235, 0.3);
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .galaxy-tips h4 {
+            margin: 0 0 8px 0;
+            font-size: 13px;
+            color: #87ceeb;
+        }
+        
+        .galaxy-tips ul {
+            margin: 0;
+            padding-left: 15px;
+            list-style-type: none;
+        }
+        
+        .galaxy-tips li {
+            margin: 4px 0;
+            position: relative;
+        }
+        
+        .galaxy-tips li:before {
+            content: "✨";
+            position: absolute;
+            left: -15px;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 25;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .loading-text {
+            color: #87ceeb;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .loading-bar-container {
+            width: 400px;
+            height: 20px;
+            background: rgba(135, 206, 235, 0.2);
+            border: 2px solid #87ceeb;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .loading-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #87ceeb, #4682b4, #87ceeb);
+            background-size: 200% 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            animation: loading-shimmer 2s ease-in-out infinite;
+        }
+        
+        .loading-percentage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+            z-index: 1;
+        }
+        
+        @keyframes loading-shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        .audio-controls {
+            position: absolute;
+            top: 20px;
+            right: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 15;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .audio-controls:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .audio-controls.muted {
+            background: rgba(255, 100, 100, 0.3);
+            border-color: rgba(255, 100, 100, 0.5);
+        }
+        
+        .audio-prompt {
+            display: none !important; /* Hide the popup completely */
+        }
+        
+        .star-map-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #87ceeb;
+            max-width: 300px;
+            z-index: 20;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(135, 206, 235, 0.3);
+        }
+        
+        .star-map-tooltip.visible {
+            opacity: 1;
+        }
+        
+        .tooltip-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(135, 206, 235, 0.3);
+            padding-bottom: 8px;
+        }
+        
+        .tooltip-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 1px solid #87ceeb;
+        }
+        
+        .tooltip-username {
+            color: #87ceeb;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .tooltip-content {
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        .tooltip-meta {
+            font-size: 11px;
+            opacity: 0.7;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Astrogoblin Comment Shop Picker</h1>
+        <p>Note: This will ONLY display post details for creators of the post. Campaign subscribers cannot use this to view details for other creators, this is a limitation in the Patreon API.</p>
+        
+        <div id="auth-section">
+            <h3 id="auth-status">🔐 Not Authenticated</h3>
+            <button onclick="connectPatreon()">Connect to Patreon</button>
+        </div>
+        
+        <div id="extract-section" style="display: none;">
+            <h3>Extract Post Comments</h3>
+            <p style="color: #666; font-size: 14px; margin-bottom: 15px;">
+                📝 <strong>Note:</strong> You can only extract comments from posts you created on your own Patreon account.
+            </p>
+            <input type="url" id="postUrl" placeholder="https://www.patreon.com/posts/comment-shop-53-130475681" 
+                   value="">
+            <br>
+            <button onclick="extractComments()">Find Comments</button>
+        </div>
+        
+        <div id="status" class="status"></div>
+        
+        <div id="results" class="results">
+            <h3>Results</h3>
+            <div id="results-content"></div>
+        </div>
+    </div>
+
+    <!-- Star Map Container -->
+    <div id="star-map-container">
+        <div class="room-environment"></div>
+        <div class="hologram-projection"></div>
+        <div class="hologram-grid"></div>
+        <div class="flash-overlay" id="flash-overlay"></div>
+        
+        <div class="star-map-info" id="star-map-info">
+            <h3>The Comment Galaxy</h3>
+            <p id="post-title">Loading...</p>
+            <p id="comment-count">0 comments found</p>
+            <p id="total-likes">0 total likes</p>
+            <button class="audio-controls" id="audio-toggle-info" onclick="toggleAudio()" title="Toggle Audio" style="margin-top: 10px; position: relative; top: 0; right: 0; width: 30px; height: 30px; font-size: 14px;">🔊</button>
+            
+            <div class="galaxy-tips">
+                <h4>Navigation Tips:</h4>
+                <ul>
+                    <li>Use mouse to rotate the map</li>
+                    <li>Use scroll wheel to zoom in & out</li>
+                    <li>Hover over stars to see comments</li>
+                    <li>Press Escape to close galaxy</li>
+                </ul>
+            </div>
+        </div>
+        
+        <button class="audio-controls" id="audio-toggle" onclick="toggleAudio()" title="Toggle Audio">🔊</button>
+        <button class="close-star-map" onclick="closeStarMap()">Close Galaxy</button>
+        
+        <div class="podium">
+            <div class="orb" id="orb"></div>
+        </div>
+        <canvas id="hologram-canvas"></canvas>
+        
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="loading-text">Generating Comment Galaxy...</div>
+            <div class="loading-bar-container">
+                <div class="loading-percentage" id="loading-percentage">0%</div>
+                <div class="loading-bar" id="loading-bar"></div>
+            </div>
+        </div>
+        
+        <!-- Audio Prompt -->
+        <div id="audio-prompt" class="audio-prompt">
+            <h3 style="margin-top: 0; color: #87ceeb;">🎵 Immersive Audio Experience</h3>
+            <p>Click to enable background music for the full galaxy experience!</p>
+            <button onclick="enableAudio()" style="background: #87ceeb; color: #000; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 10px;">Enable Audio</button>
+            <button onclick="skipAudio()" style="background: transparent; color: white; border: 1px solid #87ceeb; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 10px;">Skip</button>
+        </div>
+        
+        <!-- Tooltip for star hover -->
+        <div id="star-tooltip" class="star-map-tooltip">
+            <div class="tooltip-header">
+                <img id="tooltip-avatar" class="tooltip-avatar" src="" alt="" style="display: none;">
+                <span id="tooltip-username" class="tooltip-username"></span>
+            </div>
+            <div id="tooltip-content" class="tooltip-content"></div>
+            <div class="tooltip-meta">
+                <span id="tooltip-likes"></span>
+                <span id="tooltip-date"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio element for background music -->
+    <audio id="galaxy-audio" loop preload="auto">
+        <source src="galaxy-music.mp3" type="audio/mpeg">
+        <source src="galaxy-music.wav" type="audio/wav">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Audio element for sound effects -->
+    <audio id="sound-effects" preload="auto">
+        <!-- Source will be set dynamically -->
+    </audio>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let extractedData = null;
+        let isAuthenticated = false;
+        let starMapHologram = null;
+        let galaxyAudio = null;
+        let soundEffectsAudio = null;
+        let isAudioMuted = false;
+        let audioContext = null;
+
+        // Sound effect files
+        const soundEffects = [
+            'gravity.mp3',
+            'aughttobe.mp3', 
+            'gather.mp3',
+            'embarassing.mp3'
+        ];
+
+        // Clean Star Map Hologram Class
+        class StarMapHologram {
+            constructor(commentData) {
+                this.scene = null;
+                this.camera = null;
+                this.renderer = null;
+                this.starSystems = [];
+                this.connections = [];
+                this.animationFrame = null;
+                this.isAnimating = false;
+                this.commentData = commentData;
+                this.raycaster = new THREE.Raycaster();
+                this.mouse = new THREE.Vector2();
+                this.hoveredStar = null;
+                this.tooltip = document.getElementById('star-tooltip');
+                this.isHovering = false;
+                
+                // Mouse control
+                this.mouseDown = false;
+                this.mouseX = 0;
+                this.mouseY = 0;
+                this.rotationX = 0;
+                this.rotationY = 0;
+                this.autoRotate = true;
+                this.controlsEnabled = false;
+                
+                // Zoom control
+                this.zoomLevel = 1.0;
+                this.minZoom = 0.3;
+                this.maxZoom = 3.0;
+                
+                // Loading progress
+                this.loadingProgress = 0;
+                this.isLoading = true;
+                
+                console.log('StarMapHologram: Starting initialization');
+                this.init();
+                this.setupControls();
+            }
+            
+            init() {
+                console.log('StarMapHologram: Initializing Three.js scene');
+                
+                const canvas = document.getElementById('hologram-canvas');
+                
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.renderer = new THREE.WebGLRenderer({ 
+                    canvas: canvas,
+                    alpha: true,
+                    antialias: true 
+                });
+                
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setClearColor(0x000000, 0);
+                
+                this.camera.position.set(0, 0, 8);
+                this.camera.lookAt(0, 0, 0);
+                
+                this.createStarMapFromComments();
+                this.createStarConnections();
+                
+                // Add atmospheric lighting and fog
+                const ambientLight = new THREE.AmbientLight(0x4682b4, 0.1);
+                this.scene.add(ambientLight);
+                
+                // Add subtle fog for depth
+                this.scene.fog = new THREE.Fog(0x000000, 5, 25);
+                
+                // Add atmospheric particles
+                this.createAtmosphericParticles();
+                
+                // Add background stars/galaxies
+                this.createBackgroundStars();
+                
+                console.log('StarMapHologram: Scene initialized');
+            }
+            
+            setupControls() {
+                console.log('StarMapHologram: Setting up controls');
+                const canvas = document.getElementById('hologram-canvas');
+                
+                canvas.addEventListener('mousedown', (e) => {
+                    console.log('Mouse down, controls enabled:', this.controlsEnabled);
+                    if (!this.controlsEnabled) return;
+                    
+                    this.mouseDown = true;
+                    this.mouseX = e.clientX;
+                    this.mouseY = e.clientY;
+                    this.autoRotate = false;
+                    canvas.style.cursor = 'grabbing';
+                    console.log('Started dragging');
+                });
+                
+                canvas.addEventListener('mouseup', () => {
+                    this.mouseDown = false;
+                    canvas.style.cursor = 'grab';
+                    // Resume auto-rotation after a brief delay when mouse is released
+                    setTimeout(() => {
+                        if (!this.isHovering && !this.mouseDown) {
+                            this.autoRotate = true;
+                        }
+                    }, 1000); // 1 second delay before auto-rotation resumes
+                });
+                
+                canvas.addEventListener('mousemove', (e) => {
+                    if (!this.controlsEnabled) return;
+                    
+                    const rect = canvas.getBoundingClientRect();
+                    this.mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                    this.mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+                    
+                    if (this.mouseDown) {
+                        const deltaX = e.clientX - this.mouseX;
+                        const deltaY = e.clientY - this.mouseY;
+                        
+                        this.rotationY += deltaX * 0.01;
+                        this.rotationX += deltaY * 0.01;
+                        this.rotationX = Math.max(-1, Math.min(1, this.rotationX));
+                        
+                        this.mouseX = e.clientX;
+                        this.mouseY = e.clientY;
+                        
+                        console.log('Rotating:', this.rotationX, this.rotationY);
+                    } else {
+                        this.checkHover();
+                    }
+                });
+                
+                canvas.addEventListener('mouseleave', () => {
+                    this.mouseDown = false;
+                    this.hideTooltip();
+                    canvas.style.cursor = 'default';
+                });
+                
+                document.addEventListener('mouseup', () => {
+                    if (this.mouseDown) {
+                        this.mouseDown = false;
+                        canvas.style.cursor = 'grab';
+                        // Resume auto-rotation after a brief delay when dragging ends
+                        setTimeout(() => {
+                            if (!this.isHovering && !this.mouseDown) {
+                                this.autoRotate = true;
+                            }
+                        }, 1000); // 1 second delay
+                    }
+                });
+                
+                // Add mouse wheel zoom
+                canvas.addEventListener('wheel', (e) => {
+                    if (!this.controlsEnabled || this.isLoading) return;
+                    
+                    e.preventDefault();
+                    
+                    const zoomSpeed = 0.1;
+                    const delta = e.deltaY > 0 ? 1 : -1;
+                    const newZoom = this.zoomLevel + (delta * zoomSpeed);
+                    
+                    this.zoomLevel = Math.max(this.minZoom, Math.min(this.maxZoom, newZoom));
+                    
+                    // Apply zoom by moving camera position
+                    const baseDistance = 8;
+                    const newDistance = baseDistance / this.zoomLevel;
+                    
+                    // Maintain camera direction but change distance
+                    const direction = new THREE.Vector3();
+                    this.camera.getWorldDirection(direction);
+                    direction.multiplyScalar(-newDistance);
+                    
+                    this.camera.position.copy(direction);
+                    this.camera.lookAt(0, 0, 0);
+                    
+                    console.log('Zoom level:', this.zoomLevel.toFixed(2), 'Camera distance:', newDistance.toFixed(2));
+                });
+            }
+            
+            showLoadingOverlay() {
+                const overlay = document.getElementById('loading-overlay');
+                overlay.classList.add('active');
+            }
+            
+            hideLoadingOverlay() {
+                const overlay = document.getElementById('loading-overlay');
+                overlay.classList.remove('active');
+            }
+            
+            updateLoadingProgress(percentage, message) {
+                const bar = document.getElementById('loading-bar');
+                const percentageText = document.getElementById('loading-percentage');
+                const loadingText = document.querySelector('.loading-text');
+                
+                if (bar) bar.style.width = `${percentage}%`;
+                if (percentageText) percentageText.textContent = `${percentage}%`;
+                if (loadingText) loadingText.textContent = message;
+                
+                this.loadingProgress = percentage;
+            }
+            
+            playRandomSoundEffect() {
+                if (isAudioMuted) {
+                    console.log('Audio is muted, skipping sound effect');
+                    return;
+                }
+                
+                if (!soundEffectsAudio) {
+                    soundEffectsAudio = document.getElementById('sound-effects');
+                }
+                
+                if (soundEffectsAudio) {
+                    // Randomly select a sound effect
+                    const randomIndex = Math.floor(Math.random() * soundEffects.length);
+                    const selectedSound = soundEffects[randomIndex];
+                    
+                    console.log('Playing random sound effect:', selectedSound);
+                    
+                    // Set the source
+                    soundEffectsAudio.src = selectedSound;
+                    soundEffectsAudio.volume = 0.5; // 50% volume
+                    
+                    // Play the sound effect
+                    const playPromise = soundEffectsAudio.play();
+                    
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log('Sound effect played successfully:', selectedSound);
+                        }).catch(error => {
+                            console.log('Sound effect play failed:', error);
+                        });
+                    }
+                } else {
+                    console.log('Sound effects audio element not found');
+                }
+            }
+            
+            checkHover() {
+                if (this.isLoading) return; // Don't allow hover during loading
+                
+                this.raycaster.setFromCamera(this.mouse, this.camera);
+                
+                const stars = [];
+                this.starSystems.forEach(starGroup => {
+                    if (starGroup.children[0]) {
+                        stars.push(starGroup.children[0]);
+                    }
+                });
+                
+                const intersects = this.raycaster.intersectObjects(stars);
+                
+                if (intersects.length > 0) {
+                    const starMesh = intersects[0].object;
+                    const starGroup = starMesh.parent;
+                    const comment = starGroup.userData.config?.comment;
+                    
+                    if (comment && this.hoveredStar !== starGroup) {
+                        console.log('Hovering over star:', comment.username);
+                        this.hoveredStar = starGroup;
+                        this.isHovering = true;
+                        this.autoRotate = false;
+                        this.showTooltip(comment, intersects[0].point);
+                    }
+                } else {
+                    if (this.hoveredStar) {
+                        console.log('No longer hovering');
+                        this.hoveredStar = null;
+                        this.isHovering = false;
+                        // Don't immediately resume auto-rotation to prevent bouncing
+                        setTimeout(() => {
+                            if (!this.isHovering && !this.mouseDown) {
+                                this.autoRotate = true;
+                            }
+                        }, 500); // Half second delay before auto-rotation resumes
+                        this.hideTooltip();
+                    }
+                }
+            }
+            
+            createStarMapFromComments() {
+                const comments = this.commentData.comments.filter(c => c.id !== 'no_comments');
+                console.log('Creating stars for', comments.length, 'comments');
+                
+                if (comments.length === 0) {
+                    this.createSingleStar();
+                    return;
+                }
+                
+                comments.forEach((comment, index) => {
+                    const likes = comment.likes || 0;
+                    const contentLength = comment.content ? comment.content.length : 0;
+                    
+                    // Size based on character count (10-256+ characters)
+                    const minSize = 0.3;
+                    const maxSize = 1.0;
+                    const minChars = 10;
+                    const maxChars = 256;
+                    const clampedLength = Math.max(minChars, Math.min(maxChars, contentLength));
+                    const sizeProgress = (clampedLength - minChars) / (maxChars - minChars);
+                    const starSize = minSize + (sizeProgress * (maxSize - minSize));
+                    
+                    // Color based on likes with smooth transitions
+                    let starColor;
+                    if (likes === 0) {
+                        starColor = 0xE6F3FF; // White-blue for no likes
+                    } else if (likes <= 3) {
+                        // White (0 likes) to White (3 likes)
+                        starColor = 0xFFFFFF;
+                    } else if (likes <= 7) {
+                        // White-yellow to Yellow (4-7 likes)
+                        const progress = (likes - 4) / 3; // 0 to 1
+                        const r = 255;
+                        const g = 255;
+                        const b = Math.floor(255 - (progress * 100)); // 255 to 155
+                        starColor = (r << 16) | (g << 8) | b;
+                    } else if (likes <= 12) {
+                        // Yellow-orange to Orange (8-12 likes)
+                        const progress = (likes - 8) / 4; // 0 to 1
+                        const r = 255;
+                        const g = Math.floor(255 - (progress * 90)); // 255 to 165
+                        const b = Math.floor(155 - (progress * 155)); // 155 to 0
+                        starColor = (r << 16) | (g << 8) | b;
+                    } else {
+                        // Red for 15+ likes
+                        starColor = 0xFF4444;
+                    }
+                    
+                    const intensity = Math.max(0.8, Math.min(2.0, 1.0 + (likes * 0.05)));
+                    
+                    console.log(`Star ${index + 1}: ${comment.username}, chars=${contentLength}, likes=${likes}, size=${starSize.toFixed(2)}, color=#${starColor.toString(16)}`);
+                    
+                    // Improved positioning - keep stars above projector and within screen bounds
+                    const radiusMin = 2.5; // Minimum distance from center
+                    const radiusMax = 5.5; // Maximum distance from center  
+                    const radius = radiusMin + Math.random() * (radiusMax - radiusMin);
+                    
+                    // Angle around the circle - spread evenly with some randomness
+                    const baseTheta = (index / comments.length) * Math.PI * 2;
+                    const thetaVariation = (Math.random() - 0.5) * 0.8; // Less random variation
+                    const theta = baseTheta + thetaVariation;
+                    
+                    // Vertical positioning - keep above projector
+                    const minY = -0.5; // Don't go too far below center
+                    const maxY = 3.0;   // Extend upward
+                    const yPosition = minY + Math.random() * (maxY - minY);
+                    
+                    // Bias toward upper positions to avoid projector
+                    const biasedY = yPosition + Math.random() * 1.5;
+                    
+                    const x = radius * Math.cos(theta);
+                    const y = Math.min(maxY, biasedY); // Cap maximum height
+                    const z = radius * Math.sin(theta);
+                    
+                    const starGroup = this.createStarSystem({
+                        size: starSize,
+                        color: starColor,
+                        intensity: intensity,
+                        position: { x, y, z },
+                        comment: comment,
+                        delay: index * 0.2
+                    });
+                    
+                    this.starSystems.push(starGroup);
+                    this.scene.add(starGroup);
+                });
+            }
+            
+            createSingleStar() {
+                const starGroup = this.createStarSystem({
+                    size: 0.8,
+                    color: 0x87ceeb,
+                    intensity: 1.0,
+                    position: { x: 0, y: 0, z: 0 },
+                    comment: { content: "No comments found", username: "System" },
+                    delay: 0
+                });
+                
+                this.starSystems.push(starGroup);
+                this.scene.add(starGroup);
+            }
+            
+            createStarSystem(config) {
+                const starGroup = new THREE.Group();
+                
+                const starGeometry = new THREE.SphereGeometry(config.size * 0.15, 8, 8); // Reduced from 0.2 to 0.15 (25% smaller)
+                const starMaterial = new THREE.MeshBasicMaterial({ 
+                    color: config.color,
+                    transparent: true,
+                    opacity: 0
+                });
+                
+                const star = new THREE.Mesh(starGeometry, starMaterial);
+                starGroup.add(star);
+                
+                const glowGeometry = new THREE.SphereGeometry(config.size * 0.45, 8, 8); // Reduced from 0.6 to 0.45 (25% smaller)
+                const glowMaterial = new THREE.ShaderMaterial({
+                    uniforms: {
+                        time: { value: 0 },
+                        color: { value: new THREE.Color(config.color) },
+                        intensity: { value: config.intensity }
+                    },
+                    vertexShader: `
+                        varying vec3 vNormal;
+                        varying vec3 vPosition;
+                        void main() {
+                            vNormal = normalize(normalMatrix * normal);
+                            vPosition = position;
+                            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                        }
+                    `,
+                    fragmentShader: `
+                        uniform float time;
+                        uniform vec3 color;
+                        uniform float intensity;
+                        varying vec3 vNormal;
+                        varying vec3 vPosition;
+                        
+                        void main() {
+                            float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 2.0);
+                            float pulse = sin(time * 2.0 + length(vPosition) * 3.0) * 0.2 + 0.8;
+                            float alpha = fresnel * intensity * pulse * 0.6;
+                            gl_FragColor = vec4(color, alpha);
+                        }
+                    `,
+                    transparent: true,
+                    blending: THREE.AdditiveBlending,
+                    side: THREE.BackSide
+                });
+                
+                const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+                starGroup.add(glow);
+                
+                starGroup.position.set(config.position.x, config.position.y, config.position.z);
+                starGroup.scale.set(0, 0, 0);
+                starGroup.userData = { 
+                    originalScale: 1,
+                    config: config,
+                    delay: config.delay
+                };
+                
+                return starGroup;
+            }
+            
+            createAtmosphericParticles() {
+                const particleCount = 80; // Increased from 50
+                const particleGeometry = new THREE.BufferGeometry();
+                const positions = new Float32Array(particleCount * 3);
+                const sizes = new Float32Array(particleCount);
+                
+                for (let i = 0; i < particleCount; i++) {
+                    // Create particles in a large sphere around the galaxy
+                    const radius = 12 + Math.random() * 15; // Closer particles
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.acos(2 * Math.random() - 1);
+                    
+                    positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+                    positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                    positions[i * 3 + 2] = radius * Math.cos(phi);
+                    
+                    sizes[i] = Math.random() * 0.8 + 0.2; // Slightly larger
+                }
+                
+                particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                particleGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+                
+                const particleMaterial = new THREE.ShaderMaterial({
+                    uniforms: {
+                        time: { value: 0 },
+                        opacity: { value: 0.4 } // Increased opacity
+                    },
+                    vertexShader: `
+                        attribute float size;
+                        uniform float time;
+                        
+                        void main() {
+                            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                            gl_PointSize = size * (200.0 / -mvPosition.z);
+                            gl_Position = projectionMatrix * mvPosition;
+                        }
+                    `,
+                    fragmentShader: `
+                        uniform float time;
+                        uniform float opacity;
+                        
+                        void main() {
+                            float dist = distance(gl_PointCoord, vec2(0.5));
+                            if (dist > 0.5) discard;
+                            
+                            float alpha = 1.0 - smoothstep(0.0, 0.5, dist);
+                            float twinkle = sin(time * 3.0 + gl_FragCoord.x * 0.01) * 0.5 + 0.5;
+                            gl_FragColor = vec4(0.7, 0.9, 1.0, alpha * opacity * twinkle);
+                        }
+                    `,
+                    transparent: true,
+                    blending: THREE.AdditiveBlending
+                });
+                
+                this.atmosphericParticles = new THREE.Points(particleGeometry, particleMaterial);
+                this.scene.add(this.atmosphericParticles);
+            }
+            
+            createBackgroundStars() {
+                const backgroundStarCount = 500; // Increased from 200
+                const starGeometry = new THREE.BufferGeometry();
+                const positions = new Float32Array(backgroundStarCount * 3);
+                const colors = new Float32Array(backgroundStarCount * 3);
+                const sizes = new Float32Array(backgroundStarCount);
+                
+                for (let i = 0; i < backgroundStarCount; i++) {
+                    // Create background stars in a much larger sphere
+                    const radius = 25 + Math.random() * 80; // Wider range
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.acos(2 * Math.random() - 1);
+                    
+                    positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+                    positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                    positions[i * 3 + 2] = radius * Math.cos(phi);
+                    
+                    // Fixed: Added colorType variable declaration
+                    const colorType = Math.random();
+                    
+                    // Blue-white stars
+                    if (colorType < 0.6) {
+                        // Blue-white stars - much brighter
+                        colors[i * 3] = 0.9 + Math.random() * 0.1;     // Red
+                        colors[i * 3 + 1] = 0.95 + Math.random() * 0.05; // Green  
+                        colors[i * 3 + 2] = 1.0;                       // Blue
+                    } else if (colorType < 0.8) {
+                        // White stars - very bright
+                        const intensity = 0.95 + Math.random() * 0.05;
+                        colors[i * 3] = intensity;
+                        colors[i * 3 + 1] = intensity;
+                        colors[i * 3 + 2] = intensity;
+                    } else {
+                        // Yellow-orange stars - brighter
+                        colors[i * 3] = 1.0;                           // Red
+                        colors[i * 3 + 1] = 0.9 + Math.random() * 0.1; // Green
+                        colors[i * 3 + 2] = 0.4 + Math.random() * 0.2; // Blue
+                    }
+                    
+                    sizes[i] = Math.random() * 2.0 + 0.5; // Larger stars
+                }
+                
+                starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+                starGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+                
+                const backgroundStarMaterial = new THREE.ShaderMaterial({
+                    uniforms: {
+                        time: { value: 0 },
+                        opacity: { value: 0.9 } // Increased opacity
+                    },
+                    vertexShader: `
+                        attribute float size;
+                        attribute vec3 color;
+                        varying vec3 vColor;
+                        uniform float time;
+                        
+                        void main() {
+                            vColor = color;
+                            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                            float twinkle = sin(time * 1.5 + position.x * 5.0 + position.y * 3.0) * 0.4 + 0.6;
+                            gl_PointSize = size * twinkle * (400.0 / -mvPosition.z);
+                            gl_Position = projectionMatrix * mvPosition;
+                        }
+                    `,
+                    fragmentShader: `
+                        varying vec3 vColor;
+                        uniform float opacity;
+                        
+                        void main() {
+                            float dist = distance(gl_PointCoord, vec2(0.5));
+                            if (dist > 0.5) discard;
+                            
+                            float alpha = 1.0 - smoothstep(0.0, 0.5, dist);
+                            float center = 1.0 - smoothstep(0.0, 0.2, dist); // Brighter center
+                            gl_FragColor = vec4(vColor * (1.0 + center), alpha * opacity);
+                        }
+                    `,
+                    transparent: true,
+                    vertexColors: true,
+                    blending: THREE.AdditiveBlending
+                });
+                
+                this.backgroundStars = new THREE.Points(starGeometry, backgroundStarMaterial);
+                this.scene.add(this.backgroundStars);
+            }
+            
+            createStarConnections() {
+                if (this.starSystems.length < 2) return;
+                
+                for (let i = 0; i < this.starSystems.length; i++) {
+                    const star1 = this.starSystems[i];
+                    const distances = [];
+                    
+                    for (let j = 0; j < this.starSystems.length; j++) {
+                        if (i !== j) {
+                            const star2 = this.starSystems[j];
+                            const distance = star1.position.distanceTo(star2.position);
+                            distances.push({ index: j, distance: distance, star: star2 });
+                        }
+                    }
+                    
+                    distances.sort((a, b) => a.distance - b.distance);
+                    
+                    const maxConnections = this.starSystems.length > 5 ? 3 : 2;
+                    for (let k = 0; k < Math.min(maxConnections, distances.length); k++) {
+                        if (distances[k].distance < 20) {
+                            this.createConnection(star1.position, distances[k].star.position);
+                        }
+                    }
+                }
+            }
+            
+            createConnection(pos1, pos2) {
+                const points = [pos1, pos2];
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                
+                const material = new THREE.ShaderMaterial({
+                    uniforms: {
+                        time: { value: 0 },
+                        opacity: { value: 0 }
+                    },
+                    vertexShader: `
+                        void main() {
+                            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                        }
+                    `,
+                    fragmentShader: `
+                        uniform float time;
+                        uniform float opacity;
+                        void main() {
+                            float pulse = sin(time * 3.0) * 0.3 + 0.7;
+                            gl_FragColor = vec4(0.5, 0.7, 1.0, opacity * pulse);
+                        }
+                    `,
+                    transparent: true,
+                    blending: THREE.AdditiveBlending
+                });
+                
+                const line = new THREE.Line(geometry, material);
+                this.connections.push(line);
+                this.scene.add(line);
+            }
+            
+            showTooltip(comment, worldPosition) {
+                const screenPosition = worldPosition.clone().project(this.camera);
+                const canvas = document.getElementById('hologram-canvas');
+                const rect = canvas.getBoundingClientRect();
+                
+                const x = (screenPosition.x * 0.5 + 0.5) * rect.width + rect.left;
+                const y = (screenPosition.y * -0.5 + 0.5) * rect.height + rect.top;
+                
+                const tooltip = this.tooltip;
+                const avatar = document.getElementById('tooltip-avatar');
+                const username = document.getElementById('tooltip-username');
+                const content = document.getElementById('tooltip-content');
+                const likes = document.getElementById('tooltip-likes');
+                const date = document.getElementById('tooltip-date');
+                
+                username.textContent = comment.username || 'Unknown User';
+                content.textContent = comment.content || 'No content';
+                likes.textContent = `❤️ ${comment.likes || 0} likes`;
+                date.textContent = `📅 ${formatDate(comment.createdAt)}`;
+                
+                if (comment.profileImage) {
+                    avatar.src = comment.profileImage;
+                    avatar.style.display = 'block';
+                } else {
+                    avatar.style.display = 'none';
+                }
+                
+                tooltip.style.left = `${Math.min(x + 10, window.innerWidth - 320)}px`;
+                tooltip.style.top = `${Math.max(y - 50, 10)}px`;
+                tooltip.classList.add('visible');
+            }
+            
+            hideTooltip() {
+                this.tooltip.classList.remove('visible');
+            }
+            
+            startHologramSequence() {
+                // Show loading during the actual hologram sequence
+                this.showLoadingOverlay();
+                this.updateLoadingProgress(10, "Initializing holographic projector...");
+                
+                const orb = document.getElementById('orb');
+                const flashOverlay = document.getElementById('flash-overlay');
+                
+                setTimeout(() => {
+                    this.updateLoadingProgress(25, "Powering up projection orb...");
+                    orb.classList.add('glowing');
+                }, 500);
+                
+                setTimeout(() => {
+                    this.updateLoadingProgress(40, "Calibrating stellar coordinates...");
+                }, 1800);
+                
+                setTimeout(() => {
+                    this.updateLoadingProgress(55, "Materializing comment constellation...");
+                    flashOverlay.classList.add('active');
+                }, 2500);
+                
+                setTimeout(() => {
+                    this.updateLoadingProgress(75, "Finalizing galaxy projection...");
+                    this.animateStarMap();
+                }, 3000);
+                
+                // Don't complete the loading here - wait for stars to be interactive
+            }
+            
+            animateStarMap() {
+                this.isAnimating = true;
+                const startTime = Date.now();
+                
+                const animate = () => {
+                    const elapsed = (Date.now() - startTime) / 1000;
+                    
+                    // Phase 1: Burst expansion (0-4s)
+                    if (elapsed < 4) {
+                        const progress = elapsed / 4;
+                        const easeProgress = 1 - Math.pow(1 - progress, 3);
+                        
+                        this.starSystems.forEach((starGroup) => {
+                            const delay = starGroup.userData.delay;
+                            const adjustedProgress = Math.max(0, (progress - delay / 4) * 1.2);
+                            
+                            if (adjustedProgress > 0) {
+                                const scale = Math.min(adjustedProgress, 1);
+                                starGroup.scale.set(scale, scale, scale);
+                                
+                                starGroup.children.forEach(child => {
+                                    if (child.material) {
+                                        if (child.material.opacity !== undefined) {
+                                            child.material.opacity = Math.min(adjustedProgress, 1);
+                                        }
+                                        if (child.material.uniforms && child.material.uniforms.time) {
+                                            child.material.uniforms.time.value = elapsed;
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                        
+                        this.connections.forEach(connection => {
+                            connection.material.uniforms.opacity.value = easeProgress * 0.6;
+                            connection.material.uniforms.time.value = elapsed;
+                        });
+                    }
+                    
+                    // Phase 2: Interactive mode (4s+)
+                    else {
+                        if (!this.controlsEnabled) {
+                            this.controlsEnabled = true;
+                            const canvas = document.getElementById('hologram-canvas');
+                            canvas.style.cursor = 'grab';
+                            console.log('Controls enabled - drag to rotate');
+                            
+                            // Now complete the loading sequence since controls are enabled
+                            this.updateLoadingProgress(90, "Systems online - preparing interface...");
+                            setTimeout(() => {
+                                this.updateLoadingProgress(100, "Galaxy ready for exploration!");
+                                
+                                // Play random sound effect when galaxy is ready
+                                setTimeout(() => {
+                                    this.playRandomSoundEffect();
+                                }, 200);
+                                
+                                setTimeout(() => {
+                                    this.hideLoadingOverlay();
+                                    this.isLoading = false;
+                                    console.log('Hologram sequence complete - fully interactive');
+                                }, 800);
+                            }, 500);
+                        }
+                        
+                        // Apply rotation based on user input or auto-rotate
+                        if (!this.autoRotate && (this.rotationX !== 0 || this.rotationY !== 0)) {
+                            this.scene.rotation.x = this.rotationX;
+                            this.scene.rotation.y = this.rotationY;
+                        } else if (this.autoRotate && !this.isHovering) {
+                            this.scene.rotation.y += 0.0001; // Back to your original perfect speed
+                        }
+                        
+                        // Update camera zoom position if needed
+                        if (this.zoomLevel !== 1.0) {
+                            const baseDistance = 8;
+                            const newDistance = baseDistance / this.zoomLevel;
+                            
+                            // Get current camera direction and apply zoom
+                            const direction = new THREE.Vector3(0, 0, 1);
+                            direction.applyQuaternion(this.camera.quaternion);
+                            direction.multiplyScalar(newDistance);
+                            
+                            this.camera.position.copy(direction);
+                        }
+                        
+                        // Update twinkling effects
+                        this.starSystems.forEach(starGroup => {
+                            starGroup.children.forEach(child => {
+                                if (child.material && child.material.uniforms && child.material.uniforms.time) {
+                                    child.material.uniforms.time.value = elapsed;
+                                }
+                            });
+                        });
+                        
+                        this.connections.forEach(connection => {
+                            connection.material.uniforms.time.value = elapsed;
+                        });
+                        
+                        // Update atmospheric particles
+                        if (this.atmosphericParticles && this.atmosphericParticles.material.uniforms) {
+                            this.atmosphericParticles.material.uniforms.time.value = elapsed;
+                        }
+                        
+                        // Update background stars
+                        if (this.backgroundStars && this.backgroundStars.material.uniforms) {
+                            this.backgroundStars.material.uniforms.time.value = elapsed;
+                        }
+                    }
+                    
+                    this.renderer.render(this.scene, this.camera);
+                    
+                    if (this.isAnimating) {
+                        this.animationFrame = requestAnimationFrame(animate);
+                    }
+                };
+                
+                animate();
+            }
+            
+            dispose() {
+                this.isAnimating = false;
+                if (this.animationFrame) {
+                    cancelAnimationFrame(this.animationFrame);
+                }
+                
+                this.hideTooltip();
+                this.scene.rotation.set(0, 0, 0);
+                this.controlsEnabled = false;
+                this.mouseDown = false;
+                this.rotationX = 0;
+                this.rotationY = 0;
+                this.autoRotate = true;
+                this.isHovering = false;
+                this.zoomLevel = 1.0;
+                
+                // Complete cleanup of all objects
+                this.starSystems.forEach(starGroup => {
+                    this.scene.remove(starGroup);
+                    // Dispose geometries and materials
+                    starGroup.children.forEach(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (child.material.dispose) child.material.dispose();
+                            if (child.material.uniforms) {
+                                Object.values(child.material.uniforms).forEach(uniform => {
+                                    if (uniform.value && uniform.value.dispose) {
+                                        uniform.value.dispose();
+                                    }
+                                });
+                            }
+                        }
+                    });
+                });
+                this.starSystems = [];
+                
+                this.connections.forEach(connection => {
+                    this.scene.remove(connection);
+                    if (connection.geometry) connection.geometry.dispose();
+                    if (connection.material) connection.material.dispose();
+                });
+                this.connections = [];
+                
+                if (this.atmosphericParticles) {
+                    this.scene.remove(this.atmosphericParticles);
+                    if (this.atmosphericParticles.geometry) this.atmosphericParticles.geometry.dispose();
+                    if (this.atmosphericParticles.material) this.atmosphericParticles.material.dispose();
+                    this.atmosphericParticles = null;
+                }
+                
+                if (this.backgroundStars) {
+                    this.scene.remove(this.backgroundStars);
+                    if (this.backgroundStars.geometry) this.backgroundStars.geometry.dispose();
+                    if (this.backgroundStars.material) this.backgroundStars.material.dispose();
+                    this.backgroundStars = null;
+                }
+                
+                // Clear the scene completely
+                while(this.scene.children.length > 0) {
+                    this.scene.remove(this.scene.children[0]);
+                }
+                
+                if (this.renderer) {
+                    this.renderer.dispose();
+                }
+            }
+        }
+
+        // Main application functions
+        window.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            if (urlParams.get('authenticated') === 'true') {
+                setAuthenticatedState(true);
+                showStatus('✅ Successfully connected to Patreon!', 'success');
+            } else if (urlParams.get('error')) {
+                const error = urlParams.get('error');
+                showStatus(`❌ Error: ${error}`, 'error');
+            }
+            
+            checkAuthStatus();
+        });
+
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                if (data.authenticated) {
+                    setAuthenticatedState(true);
+                }
+            } catch (error) {
+                console.log('Could not check auth status:', error);
+            }
+        }
+
+        function connectPatreon() {
+            showStatus('Redirecting to Patreon...', 'loading');
+            window.location.href = '/auth/patreon';
+        }
+
+        async function setAuthenticatedState(authenticated) {
+            isAuthenticated = authenticated;
+            const authSection = document.getElementById('auth-section');
+            const extractSection = document.getElementById('extract-section');
+            const authStatus = document.getElementById('auth-status');
+            const connectButton = authSection.querySelector('button');
+
+            if (authenticated) {
+                try {
+                    const response = await fetch('/api/user-info');
+                    if (response.ok) {
+                        const userData = await response.json();
+                        authStatus.textContent = `✅ Authenticated with Patreon (${userData.username})`;
+                    } else {
+                        authStatus.textContent = '✅ Authenticated with Patreon';
+                    }
+                } catch (error) {
+                    authStatus.textContent = '✅ Authenticated with Patreon';
+                }
+                
+                authStatus.style.color = '#28a745';
+                extractSection.style.display = 'block';
+                connectButton.textContent = 'Re-authenticate';
+            } else {
+                authStatus.textContent = '🔐 Not Authenticated';
+                authStatus.style.color = '#dc3545';
+                extractSection.style.display = 'none';
+                connectButton.textContent = 'Connect to Patreon';
+            }
+        }
+
+        async function extractComments() {
+            if (!isAuthenticated) {
+                showStatus('Please connect with Patreon first', 'error');
+                return;
+            }
+
+            const postUrl = document.getElementById('postUrl').value.trim();
+            if (!postUrl) {
+                showStatus('Please enter a post URL', 'error');
+                return;
+            }
+
+            showStatus('Extracting comments...', 'loading');
+            
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'none';
+            extractedData = null;
+
+            try {
+                const response = await fetch('/api/extract-post', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ postUrl })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to extract data');
+                }
+
+                extractedData = data;
+                displayResults(data);
+                showStarMap();
+                
+                showStatus(`✅ Found ${data.comments.length} comments! Displaying holographic galaxy...`, 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.style.display = 'none';
+                extractedData = null;
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            const contentDiv = document.getElementById('results-content');
+
+            let html = `
+                <p><strong>Post:</strong> ${data.post.title}</p>
+                <p><strong>Post Comments:</strong> ${data.comments.length}<small> (Excludes replies)</small></p>
+                <p><strong>Post Likes:</strong> ${data.totalLikes}</p>
+                <button onclick="exportData()" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px; margin: 15px 0;">Export comments to JSON</button>
+                <hr>
+            `;
+
+            if (data.comments.length > 0) {
+                data.comments.forEach(comment => {
+                    const profileImage = comment.profileImage ? 
+                        `<img src="${comment.profileImage}" alt="${comment.username}" class="profile-image">` : 
+                        '<span style="font-size: 24px; margin-right: 10px;">👤</span>';
+                    
+                    html += `
+                        <div class="comment">
+                            <div class="comment-author">
+                                ${profileImage}
+                                <strong>${comment.username}</strong>
+                            </div>
+                            <p>${comment.content}</p>
+                            <div class="comment-meta">
+                                ❤️ ${comment.likes} likes • 📅 ${formatDate(comment.createdAt)}
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                html += '<p>No comments found.</p>';
+            }
+
+            contentDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+
+        function showStarMap() {
+            if (!extractedData) {
+                showStatus('No comment data available', 'error');
+                return;
+            }
+
+            const container = document.getElementById('star-map-container');
+            
+            // Clear any existing hologram first
+            if (starMapHologram) {
+                console.log('Disposing previous hologram...');
+                starMapHologram.dispose();
+                starMapHologram = null;
+                
+                // Clear the canvas completely
+                const canvas = document.getElementById('hologram-canvas');
+                if (canvas) {
+                    const context = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                    if (context) {
+                        context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
+                    }
+                }
+                
+                // Reset all visual elements
+                const orb = document.getElementById('orb');
+                const flashOverlay = document.getElementById('flash-overlay');
+                orb.classList.remove('glowing');
+                flashOverlay.classList.remove('active');
+            }
+            
+            document.getElementById('post-title').textContent = extractedData.post.title;
+            
+            const commentCount = extractedData.comments.filter(c => c.id !== 'no_comments').length;
+            document.getElementById('comment-count').textContent = `${commentCount} ${commentCount === 1 ? 'comment' : 'comments'}`;
+            
+            const totalLikes = extractedData.totalLikes || 0;
+            document.getElementById('total-likes').textContent = `${totalLikes} ${totalLikes === 1 ? 'like' : 'likes'}`;
+            
+            container.classList.add('active');
+            
+            // Small delay to ensure container is visible before creating hologram
+            setTimeout(() => {
+                starMapHologram = new StarMapHologram(extractedData);
+                starMapHologram.startHologramSequence();
+                
+                // Start background music automatically (original behavior)
+                startGalaxyAudio();
+            }, 100);
+        }
+
+        function startGalaxyAudio() {
+            console.log('Attempting to start galaxy audio...');
+            
+            if (!galaxyAudio) {
+                galaxyAudio = document.getElementById('galaxy-audio');
+                console.log('Galaxy audio element found:', !!galaxyAudio);
+            }
+            
+            if (galaxyAudio) {
+                galaxyAudio.volume = 0.3; // Set to 30% volume
+                
+                // Try to play immediately with better promise handling
+                const playPromise = galaxyAudio.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        console.log('Audio started successfully');
+                        isAudioMuted = false;
+                        updateAudioButtonStates(false);
+                    }).catch(error => {
+                        console.log('Audio autoplay blocked by browser. User must click to start.', error);
+                        // Set visual state to show audio is ready but muted
+                        isAudioMuted = true;
+                        updateAudioButtonStates(true);
+                    });
+                } else {
+                    console.log('Play promise is undefined');
+                    updateAudioButtonStates(true);
+                }
+            } else {
+                console.log('Galaxy audio element not found');
+            }
+        }
+        
+        function updateAudioButtonStates(muted) {
+            const audioButton = document.getElementById('audio-toggle');
+            const audioButtonInfo = document.getElementById('audio-toggle-info');
+            
+            if (muted) {
+                if (audioButton) {
+                    audioButton.textContent = '🔇';
+                    audioButton.classList.add('muted');
+                    audioButton.title = 'Unmute Audio';
+                }
+                if (audioButtonInfo) {
+                    audioButtonInfo.textContent = '🔇';
+                    audioButtonInfo.classList.add('muted');
+                    audioButtonInfo.title = 'Unmute Audio';
+                }
+            } else {
+                if (audioButton) {
+                    audioButton.textContent = '🔊';
+                    audioButton.classList.remove('muted');
+                    audioButton.title = 'Mute Audio';
+                }
+                if (audioButtonInfo) {
+                    audioButtonInfo.textContent = '🔊';
+                    audioButtonInfo.classList.remove('muted');
+                    audioButtonInfo.title = 'Mute Audio';
+                }
+            }
+        }
+
+        function stopGalaxyAudio() {
+            if (galaxyAudio) {
+                galaxyAudio.pause();
+                galaxyAudio.currentTime = 0;
+            }
+        }
+
+        function toggleAudio() {
+            const audioButton = document.getElementById('audio-toggle');
+            const audioButtonInfo = document.getElementById('audio-toggle-info');
+            
+            if (!galaxyAudio) {
+                galaxyAudio = document.getElementById('galaxy-audio');
+            }
+            
+            if (isAudioMuted || (galaxyAudio && galaxyAudio.paused)) {
+                // Unmute/play
+                isAudioMuted = false;
+                updateAudioButtonStates(false);
+                
+                if (galaxyAudio) {
+                    galaxyAudio.volume = 0.3;
+                    galaxyAudio.play().catch(error => {
+                        console.log('Audio play failed:', error);
+                        updateAudioButtonStates(true);
+                    });
+                }
+            } else {
+                // Mute/pause
+                isAudioMuted = true;
+                updateAudioButtonStates(true);
+                
+                if (galaxyAudio) {
+                    galaxyAudio.pause();
+                }
+            }
+        }
+
+        function closeStarMap() {
+            const container = document.getElementById('star-map-container');
+            const orb = document.getElementById('orb');
+            const flashOverlay = document.getElementById('flash-overlay');
+            const loadingOverlay = document.getElementById('loading-overlay');
+            
+            container.classList.remove('active');
+            orb.classList.remove('glowing');
+            flashOverlay.classList.remove('active');
+            loadingOverlay.classList.remove('active');
+            
+            // Stop background music
+            stopGalaxyAudio();
+            
+            // Properly dispose of the current hologram
+            if (starMapHologram) {
+                starMapHologram.dispose();
+                starMapHologram = null;
+            }
+            
+            // Clear any existing canvas content
+            const canvas = document.getElementById('hologram-canvas');
+            if (canvas) {
+                const context = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (context) {
+                    context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
+                }
+            }
+        }
+
+        function exportData() {
+            if (!extractedData) return;
+
+            const dataStr = JSON.stringify(extractedData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `patreon_comments_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+
+            URL.revokeObjectURL(url);
+            showStatus('✅ Data exported!', 'success');
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+
+            if (type === 'success') {
+                setTimeout(() => status.style.display = 'none', 5000);
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString || dateString === 'Unknown') return 'Unknown';
+            return new Date(dateString).toLocaleString();
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (starMapHologram && starMapHologram.camera && starMapHologram.renderer) {
+                starMapHologram.camera.aspect = window.innerWidth / window.innerHeight;
+                starMapHologram.camera.updateProjectionMatrix();
+                starMapHologram.renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+
+        // Handle escape key
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeStarMap();
+            }
+        });
+
+    </script>
+</body>
+</html>
