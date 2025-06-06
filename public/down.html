@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Difficulties</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 90vw;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .image-container {
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .random-image {
+            max-width: 100%;
+            max-height: 60vh;
+            width: auto;
+            height: auto;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .random-image:hover {
+            transform: scale(1.02);
+        }
+
+        .credit {
+            margin-top: 2rem;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .credit a {
+            color: #FFD700;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .credit a:hover {
+            color: #FFA500;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 1rem;
+                margin: 1rem;
+            }
+            
+            .credit {
+                font-size: 1rem;
+            }
+        }
+
+        .loading {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">TECHNICAL DIFFICULTIES</h1>
+        
+        <div class="image-container">
+            <img id="randomImage" class="random-image loading" alt="Technical Difficulties Art" />
+        </div>
+        
+        <div class="credit">
+            Art by <a href="https://discord.com/channels/1248713652421529723/1250837102199836693/1377772217839915119" target="_blank">Erynsaurus</a>
+        </div>
+    </div>
+
+    <script>
+        // Array of image filenames
+        const images = ['carlot.jpg', 'jaykub.jpg', 'partick.jpg'];
+        
+        // Select a random image
+        const randomIndex = Math.floor(Math.random() * images.length);
+        const selectedImage = images[randomIndex];
+        
+        // Set the image source
+        const imgElement = document.getElementById('randomImage');
+        imgElement.src = selectedImage;
+        
+        // Remove loading animation once image loads
+        imgElement.onload = function() {
+            imgElement.classList.remove('loading');
+        };
+        
+        // Handle image load errors gracefully
+        imgElement.onerror = function() {
+            imgElement.alt = 'Image temporarily unavailable';
+            imgElement.classList.remove('loading');
+        };
+    </script>
+</body>
+</html>

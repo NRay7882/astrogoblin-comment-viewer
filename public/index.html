@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patreon Comment Extractor - Local</title>
+    <title>Astrogoblin Comment Shop Picker</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -321,35 +321,91 @@
         }
         
         .galaxy-tips {
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(135, 206, 235, 0.3);
-            font-size: 12px;
-            opacity: 0.8;
-        }
-        
-        .galaxy-tips h4 {
-            margin: 0 0 8px 0;
-            font-size: 13px;
-            color: #87ceeb;
-        }
-        
-        .galaxy-tips ul {
-            margin: 0;
-            padding-left: 15px;
-            list-style-type: none;
-        }
-        
-        .galaxy-tips li {
-            margin: 4px 0;
-            position: relative;
-        }
-        
-        .galaxy-tips li:before {
-            content: "✨";
-            position: absolute;
-            left: -15px;
-        }
+			margin-top: 15px;
+			padding-top: 10px;
+			border-top: 1px solid rgba(135, 206, 235, 0.3);
+			font-size: 12px;
+			opacity: 0.8;
+		}
+
+		.galaxy-tips h4 {
+			margin: 0 0 8px 0;
+			font-size: 13px;
+			color: #87ceeb;
+		}
+
+		.galaxy-tips h4:not(:first-child) {
+			margin-top: 12px; /* Add spacing between sections */
+		}
+
+		.galaxy-tips ul {
+			margin: 0;
+			padding-left: 0;
+			list-style-type: none;
+		}
+		
+		.galaxy-tips li {
+			margin: 4px 0;
+			display: flex;
+			align-items: flex-start;
+		}
+
+		.galaxy-tips li:before {
+			content: "✨";
+			margin-right: 4px;
+			width: 16px;
+			text-align: left;
+			flex-shrink: 0;
+		}
+
+		/* Special styling for star legend items */
+		.galaxy-tips ul:last-child li:before {
+			content: ""; /* Remove sparkle for star legend */
+			margin-right: 0; /* Remove margin for sparkle space */
+			width: 0; /* Remove width for sparkle space */
+		}
+
+		.galaxy-tips ul:last-child li {
+			align-items: center;
+			margin-left: 0; /* Ensure no extra left margin */
+		}
+
+		/* Specific styling for colored dot items (items 2-6 in Star Legend) */
+		.galaxy-tips h4:nth-of-type(2) + ul li:nth-child(n+2) {
+			padding-left: 0; /* Remove any extra padding */
+			margin-left: 0; /* Align with other items */
+		}
+
+		/* Force proper spacing for colored dot spans - more specific selector */
+		.galaxy-tips h4:nth-of-type(2) + ul li:nth-child(n+2) span {
+			font-size: 16px;
+			text-shadow: 0 0 3px currentColor;
+			margin-right: 6px !important; /* Reduce spacing for better text alignment */
+			width: 16px;
+			text-align: center;
+			flex-shrink: 0;
+			position: relative;
+			left: 0px;
+			display: inline-block; /* Ensure consistent spacing */
+		}
+
+		.galaxy-tips ul:last-child li span {
+			font-size: 16px;
+			text-shadow: 0 0 3px currentColor;
+			margin-right: 12px; /* Increase spacing between dot and text */
+			width: 16px;
+			text-align: center;
+			flex-shrink: 0;
+			position: relative;
+			left: 0px;
+		}
+		
+		/* Remove sparkles from Star Legend items with colored dots (items 2-6) */
+		.galaxy-tips h4:nth-of-type(2) + ul li:nth-child(n+2):before {
+			content: "";
+			margin-right: 0; /* Remove margin since there's no sparkle */
+			width: 0; /* Remove width since there's no sparkle */
+		}
         
         .loading-overlay {
             position: absolute;
@@ -452,63 +508,132 @@
             display: none !important; /* Hide the popup completely */
         }
         
-        .star-map-tooltip {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid #87ceeb;
-            max-width: 300px;
-            z-index: 20;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 20px rgba(135, 206, 235, 0.3);
-        }
-        
-        .star-map-tooltip.visible {
-            opacity: 1;
-        }
-        
-        .tooltip-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            border-bottom: 1px solid rgba(135, 206, 235, 0.3);
-            padding-bottom: 8px;
-        }
-        
-        .tooltip-avatar {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            margin-right: 8px;
-            border: 1px solid #87ceeb;
-        }
-        
-        .tooltip-username {
-            color: #87ceeb;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        
-        .tooltip-content {
-            font-size: 13px;
-            line-height: 1.4;
-            margin-bottom: 8px;
-            max-height: 100px;
-            overflow-y: auto;
-        }
-        
-        .tooltip-meta {
-            font-size: 11px;
-            opacity: 0.7;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
+		.star-map-tooltip {
+			position: absolute;
+			background: rgba(0, 0, 0, 0.95);
+			color: white;
+			padding: 15px;
+			border-radius: 10px;
+			border: 2px solid #87ceeb;
+			min-width: 200px;
+			max-width: 450px;
+			width: auto;
+			z-index: 100; /* MUCH higher z-index */
+			pointer-events: none; /* Start with no pointer events */
+			opacity: 0;
+			transition: opacity 0.2s ease;
+			backdrop-filter: blur(15px);
+			box-shadow: 0 0 30px rgba(135, 206, 235, 0.5);
+		}
+
+		.star-map-tooltip.visible {
+			opacity: 1;
+		}
+
+		.star-map-tooltip.interactive {
+			pointer-events: auto; /* Enable interactions when needed */
+		}
+
+		.tooltip-header {
+			display: flex;
+			align-items: center;
+			margin-bottom: 10px;
+			border-bottom: 1px solid rgba(135, 206, 235, 0.3);
+			padding-bottom: 8px;
+			white-space: nowrap;
+		}
+
+		.tooltip-avatar {
+			width: 24px;
+			height: 24px;
+			border-radius: 50%;
+			margin-right: 8px;
+			border: 1px solid #87ceeb;
+			flex-shrink: 0;
+		}
+
+		.tooltip-username {
+			color: #87ceeb;
+			font-weight: bold;
+			font-size: 14px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.tooltip-content {
+			font-size: 13px;
+			line-height: 1.5;
+			margin-bottom: 10px;
+			word-wrap: break-word;
+			white-space: pre-wrap;
+		}
+
+		.tooltip-meta {
+			font-size: 11px;
+			opacity: 0.7;
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+			margin-bottom: 8px;
+		}
+
+		.tooltip-meta span {
+			white-space: nowrap;
+		}
+		
+		/* Save button styling */
+		.tooltip-save-button {
+			background: linear-gradient(135deg, #4CAF50, #45a049);
+			color: white;
+			border: none;
+			padding: 6px 12px;
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: 11px;
+			font-weight: bold;
+			transition: all 0.2s ease;
+			margin-top: 5px;
+			width: 100%;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.tooltip-save-button:hover {
+			background: linear-gradient(135deg, #45a049, #3d8b40);
+			transform: translateY(-1px);
+			box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+		}
+
+		.tooltip-save-button.saved {
+			background: linear-gradient(135deg, #FFD700, #FFA500);
+			color: #000;
+		}
+
+		.tooltip-save-button.saved:hover {
+			background: linear-gradient(135deg, #FFA500, #FF8C00);
+		}
+		
+		.saved-star-glow {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, rgba(255, 215, 0, 0.1) 70%, transparent 100%);
+			pointer-events: none;
+			animation: saved-pulse 2s ease-in-out infinite;
+		}
+
+		@keyframes saved-pulse {
+			0%, 100% { 
+				opacity: 0.6; 
+				transform: scale(1);
+			}
+			50% { 
+				opacity: 0.9; 
+				transform: scale(1.1);
+			}
+		}
+
     </style>
 </head>
 <body>
@@ -522,9 +647,9 @@
         </div>
         
         <div id="extract-section" style="display: none;">
-            <h3>Extract Post Comments</h3>
+            <h3>Fetch Post Comments</h3>
             <p style="color: #666; font-size: 14px; margin-bottom: 15px;">
-                📝 <strong>Note:</strong> You can only extract comments from posts you created on your own Patreon account.
+                📝 <strong>Note:</strong> You can only fetch comments from posts you created on your own Patreon account.
             </p>
             <input type="url" id="postUrl" placeholder="https://www.patreon.com/posts/comment-shop-53-130475681" 
                    value="">
@@ -548,22 +673,39 @@
         <div class="flash-overlay" id="flash-overlay"></div>
         
         <div class="star-map-info" id="star-map-info">
-            <h3>The Comment Galaxy</h3>
-            <p id="post-title">Loading...</p>
-            <p id="comment-count">0 comments found</p>
-            <p id="total-likes">0 total likes</p>
-            <button class="audio-controls" id="audio-toggle-info" onclick="toggleAudio()" title="Toggle Audio" style="margin-top: 10px; position: relative; top: 0; right: 0; width: 30px; height: 30px; font-size: 14px;">🔊</button>
-            
-            <div class="galaxy-tips">
-                <h4>Navigation Tips:</h4>
-                <ul>
-                    <li>Use mouse to rotate the map</li>
-                    <li>Use scroll wheel to zoom in & out</li>
-                    <li>Hover over stars to see comments</li>
-                    <li>Press Escape to close galaxy</li>
-                </ul>
-            </div>
-        </div>
+			<h3>The Comment Galaxy</h3>
+			<p id="post-title">Loading...</p>
+			<p id="comment-count">0 comments found</p>
+			<p id="total-likes">0 total likes</p>
+			<button class="audio-controls" id="audio-toggle-info" onclick="toggleAudio()" title="Toggle Audio" style="margin-top: 10px; position: relative; top: 0; right: 0; width: 30px; height: 30px; font-size: 14px;">🔊</button>
+			
+			<div class="galaxy-tips">
+				<h4>Navigation Tips:</h4>
+				<ul>
+					<li>Use mouse to rotate the map</li>
+					<li>Use scroll wheel to zoom in & out</li>
+					<li>Hover over stars to see comments</li>
+					<li>Press Escape to close galaxy</li>
+				</ul>
+				
+				<h4>Star Legend:</h4>
+				<ul>
+					<li>Comment stars with more likes appear larger</li>
+					<li><span style="color: #E6F3FF;">●</span> Shorter comments appear white-blue</li>
+					<li><span style="color: #FFFF96;">●</span> They turn yellow & orange the longer they are</li>
+					<li><span style="color: #FF6644;">●</span> Longer comments appear red</li>
+					<li><span style="color: #808080;">●</span> Read stars turn gray & shrink in size</li>
+					<li><span style="color: #FFD700;">●</span> Saved stars turn golden & stay highlighted</li>
+				</ul>
+
+				<h4>Interaction Tips:</h4>
+				<ul style="list-style-type: none; padding-left: 0;">
+					<li>Use Save Comment to highlight important stars</li>
+					<li>Saved stars remain golden until unsaved</li>
+					<li>Save settings are not preserved between sessions</li>
+				</ul>
+			</div>
+		</div>
         
         <button class="audio-controls" id="audio-toggle" onclick="toggleAudio()" title="Toggle Audio">🔊</button>
         <button class="close-star-map" onclick="closeStarMap()">Close Galaxy</button>
@@ -591,17 +733,18 @@
         </div>
         
         <!-- Tooltip for star hover -->
-        <div id="star-tooltip" class="star-map-tooltip">
-            <div class="tooltip-header">
-                <img id="tooltip-avatar" class="tooltip-avatar" src="" alt="" style="display: none;">
-                <span id="tooltip-username" class="tooltip-username"></span>
-            </div>
-            <div id="tooltip-content" class="tooltip-content"></div>
-            <div class="tooltip-meta">
-                <span id="tooltip-likes"></span>
-                <span id="tooltip-date"></span>
-            </div>
-        </div>
+		<div id="star-tooltip" class="star-map-tooltip">
+			<div class="tooltip-header">
+				<img id="tooltip-avatar" class="tooltip-avatar" src="" alt="" style="display: none;">
+				<span id="tooltip-username" class="tooltip-username"></span>
+			</div>
+			<div id="tooltip-content" class="tooltip-content"></div>
+			<div class="tooltip-meta">
+				<span id="tooltip-likes"></span>
+				<span id="tooltip-date"></span>
+			</div>
+		</div>
+
     </div>
 
     <!-- Audio element for background music -->
@@ -634,50 +777,65 @@
             'embarassing.mp3'
         ];
 
-        // Clean Star Map Hologram Class
+        // Fixed Star Map Hologram Class
         class StarMapHologram {
             constructor(commentData) {
-                this.scene = null;
-                this.camera = null;
-                this.renderer = null;
-                this.starSystems = [];
-                this.connections = [];
-                this.animationFrame = null;
-                this.isAnimating = false;
-                this.commentData = commentData;
-                this.raycaster = new THREE.Raycaster();
-                this.mouse = new THREE.Vector2();
-                this.hoveredStar = null;
-                this.tooltip = document.getElementById('star-tooltip');
-                this.isHovering = false;
-                
-                // Mouse control
-                this.mouseDown = false;
-                this.mouseX = 0;
-                this.mouseY = 0;
-                this.rotationX = 0;
-                this.rotationY = 0;
-                this.autoRotate = true;
-                this.controlsEnabled = false;
-                
-                // Zoom control
-                this.zoomLevel = 1.0;
-                this.minZoom = 0.3;
-                this.maxZoom = 3.0;
-                
-                // Loading progress
-                this.loadingProgress = 0;
-                this.isLoading = true;
-                
-                console.log('StarMapHologram: Starting initialization');
-                this.init();
-                this.setupControls();
-            }
+				this.scene = null;
+				this.camera = null;
+				this.renderer = null;
+				this.starSystems = [];
+				this.connections = [];
+				this.animationFrame = null;
+				this.isAnimating = false;
+				this.commentData = commentData;
+				this.raycaster = new THREE.Raycaster();
+				this.mouse = new THREE.Vector2();
+				this.hoveredStar = null;
+				this.tooltip = null; // Will be set when needed
+				this.canvas = null;
+				
+				// Simplified state management
+				this.isHoveringCanvas = false;
+				this.isHoveringTooltip = false;
+				this.isHoveringButton = false;
+				this.currentHoveredComment = null;
+				this.showTooltipTimeout = null;
+				this.hideTooltipTimeout = null;
+				
+				// Mouse control
+				this.mouseDown = false;
+				this.mouseX = 0;
+				this.mouseY = 0;
+				this.rotationX = 0;
+				this.rotationY = 0;
+				this.autoRotate = true;
+				this.controlsEnabled = false;
+				
+				// Zoom control
+				this.zoomLevel = 1.0;
+				this.minZoom = 0.3;
+				this.maxZoom = 3.0;
+				
+				// Loading progress
+				this.loadingProgress = 0;
+				this.isLoading = true;
+				
+				// Read state tracking
+				this.readTimer = null;
+				
+				// Save state tracking
+				this.savedStars = new Set();
+				
+				console.log('StarMapHologram: Starting initialization');
+				this.init();
+				this.setupControls();
+			}
             
             init() {
                 console.log('StarMapHologram: Initializing Three.js scene');
                 
-                const canvas = document.getElementById('hologram-canvas');
+                this.canvas = document.getElementById('hologram-canvas');
+				const canvas = this.canvas;
                 
                 this.scene = new THREE.Scene();
                 this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -712,103 +870,130 @@
                 console.log('StarMapHologram: Scene initialized');
             }
             
-            setupControls() {
-                console.log('StarMapHologram: Setting up controls');
-                const canvas = document.getElementById('hologram-canvas');
-                
-                canvas.addEventListener('mousedown', (e) => {
-                    console.log('Mouse down, controls enabled:', this.controlsEnabled);
-                    if (!this.controlsEnabled) return;
-                    
-                    this.mouseDown = true;
-                    this.mouseX = e.clientX;
-                    this.mouseY = e.clientY;
-                    this.autoRotate = false;
-                    canvas.style.cursor = 'grabbing';
-                    console.log('Started dragging');
-                });
-                
-                canvas.addEventListener('mouseup', () => {
-                    this.mouseDown = false;
-                    canvas.style.cursor = 'grab';
-                    // Resume auto-rotation after a brief delay when mouse is released
-                    setTimeout(() => {
-                        if (!this.isHovering && !this.mouseDown) {
-                            this.autoRotate = true;
-                        }
-                    }, 1000); // 1 second delay before auto-rotation resumes
-                });
-                
-                canvas.addEventListener('mousemove', (e) => {
-                    if (!this.controlsEnabled) return;
-                    
-                    const rect = canvas.getBoundingClientRect();
-                    this.mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-                    this.mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-                    
-                    if (this.mouseDown) {
-                        const deltaX = e.clientX - this.mouseX;
-                        const deltaY = e.clientY - this.mouseY;
-                        
-                        this.rotationY += deltaX * 0.01;
-                        this.rotationX += deltaY * 0.01;
-                        this.rotationX = Math.max(-1, Math.min(1, this.rotationX));
-                        
-                        this.mouseX = e.clientX;
-                        this.mouseY = e.clientY;
-                        
-                        console.log('Rotating:', this.rotationX, this.rotationY);
-                    } else {
-                        this.checkHover();
-                    }
-                });
-                
-                canvas.addEventListener('mouseleave', () => {
-                    this.mouseDown = false;
-                    this.hideTooltip();
-                    canvas.style.cursor = 'default';
-                });
-                
-                document.addEventListener('mouseup', () => {
-                    if (this.mouseDown) {
-                        this.mouseDown = false;
-                        canvas.style.cursor = 'grab';
-                        // Resume auto-rotation after a brief delay when dragging ends
-                        setTimeout(() => {
-                            if (!this.isHovering && !this.mouseDown) {
-                                this.autoRotate = true;
-                            }
-                        }, 1000); // 1 second delay
-                    }
-                });
-                
-                // Add mouse wheel zoom
-                canvas.addEventListener('wheel', (e) => {
-                    if (!this.controlsEnabled || this.isLoading) return;
-                    
-                    e.preventDefault();
-                    
-                    const zoomSpeed = 0.1;
-                    const delta = e.deltaY > 0 ? 1 : -1;
-                    const newZoom = this.zoomLevel + (delta * zoomSpeed);
-                    
-                    this.zoomLevel = Math.max(this.minZoom, Math.min(this.maxZoom, newZoom));
-                    
-                    // Apply zoom by moving camera position
-                    const baseDistance = 8;
-                    const newDistance = baseDistance / this.zoomLevel;
-                    
-                    // Maintain camera direction but change distance
-                    const direction = new THREE.Vector3();
-                    this.camera.getWorldDirection(direction);
-                    direction.multiplyScalar(-newDistance);
-                    
-                    this.camera.position.copy(direction);
-                    this.camera.lookAt(0, 0, 0);
-                    
-                    console.log('Zoom level:', this.zoomLevel.toFixed(2), 'Camera distance:', newDistance.toFixed(2));
-                });
-            }
+            // Complete rewrite of controls with proper cursor management
+			setupControls() {
+				console.log('StarMapHologram: Setting up controls');
+				
+				this.canvas = document.getElementById('hologram-canvas');
+				
+				// Mouse move handler with proper hover detection
+				this.canvas.addEventListener('mousemove', (e) => {
+					if (!this.controlsEnabled) return;
+					
+					const rect = this.canvas.getBoundingClientRect();
+					this.mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+					this.mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+					
+					// Handle dragging
+					if (this.mouseDown) {
+						const deltaX = e.clientX - this.mouseX;
+						const deltaY = e.clientY - this.mouseY;
+						
+						this.rotationY += deltaX * 0.01;
+						this.rotationX += deltaY * 0.01;
+						this.rotationX = Math.max(-1, Math.min(1, this.rotationX));
+						
+						this.mouseX = e.clientX;
+						this.mouseY = e.clientY;
+						
+						this.autoRotate = false;
+					} else {
+						// Check for star hover
+						this.checkStarHover();
+					}
+				});
+				
+				// Mouse down with proper cursor management
+				this.canvas.addEventListener('mousedown', (e) => {
+					if (!this.controlsEnabled) return;
+					
+					this.mouseDown = true;
+					this.mouseX = e.clientX;
+					this.mouseY = e.clientY;
+					this.autoRotate = false;
+					this.setCursor('grabbing');
+					this.hideTooltipImmediate();
+				});
+				
+				// Mouse up with cursor restoration
+				this.canvas.addEventListener('mouseup', () => {
+					if (!this.mouseDown) return;
+					this.mouseDown = false;
+					this.setCursor('grab');
+					
+					// Force state recovery
+					setTimeout(() => {
+						if (!this.mouseDown && !this.isHoveringTooltip && !this.currentHoveredComment) {
+							this.autoRotate = true;
+							console.log('🔄 Auto-rotation resumed after mouse up');
+						}
+					}, 100);
+				});
+				
+				// Mouse enter/leave for canvas
+				this.canvas.addEventListener('mouseenter', () => {
+					this.isHoveringCanvas = true;
+					if (this.controlsEnabled && !this.mouseDown) {
+						this.setCursor('grab');
+					}
+				});
+				
+				this.canvas.addEventListener('mouseleave', () => {
+					this.isHoveringCanvas = false;
+					this.mouseDown = false;
+					this.setCursor('default');
+					this.hideTooltipWithDelay();
+					
+					setTimeout(() => {
+						if (!this.isHoveringTooltip) {
+							this.autoRotate = true;
+						}
+					}, 500);
+				});
+				
+				// Global mouse up handler
+				document.addEventListener('mouseup', () => {
+					if (this.mouseDown) {
+						this.mouseDown = false;
+						if (this.isHoveringCanvas) {
+							this.setCursor('grab');
+						}
+					}
+				});
+				
+				// Mouse wheel zoom
+				this.canvas.addEventListener('wheel', (e) => {
+					if (!this.controlsEnabled || this.isLoading) return;
+					
+					e.preventDefault();
+					
+					const zoomSpeed = 0.1;
+					const delta = e.deltaY > 0 ? 1 : -1;
+					const newZoom = this.zoomLevel + (delta * zoomSpeed);
+					
+					this.zoomLevel = Math.max(this.minZoom, Math.min(this.maxZoom, newZoom));
+					
+					const baseDistance = 8;
+					const newDistance = baseDistance / this.zoomLevel;
+					
+					const direction = new THREE.Vector3();
+					this.camera.getWorldDirection(direction);
+					direction.multiplyScalar(-newDistance);
+					
+					this.camera.position.copy(direction);
+					this.camera.lookAt(0, 0, 0);
+				});
+				
+				// Tooltip interaction setup
+				this.setupTooltipInteraction();
+			}
+
+			// Centralized cursor management
+			setCursor(cursorType) {
+				if (this.canvas) {
+					this.canvas.style.cursor = cursorType;
+				}
+			}
             
             showLoadingOverlay() {
                 const overlay = document.getElementById('loading-overlay');
@@ -843,17 +1028,14 @@
                 }
                 
                 if (soundEffectsAudio) {
-                    // Randomly select a sound effect
                     const randomIndex = Math.floor(Math.random() * soundEffects.length);
                     const selectedSound = soundEffects[randomIndex];
                     
                     console.log('Playing random sound effect:', selectedSound);
                     
-                    // Set the source
                     soundEffectsAudio.src = selectedSound;
-                    soundEffectsAudio.volume = 0.5; // 50% volume
+                    soundEffectsAudio.volume = 0.5;
                     
-                    // Play the sound effect
                     const playPromise = soundEffectsAudio.play();
                     
                     if (playPromise !== undefined) {
@@ -863,141 +1045,208 @@
                             console.log('Sound effect play failed:', error);
                         });
                     }
-                } else {
-                    console.log('Sound effects audio element not found');
                 }
             }
             
-            checkHover() {
-                if (this.isLoading) return; // Don't allow hover during loading
-                
-                this.raycaster.setFromCamera(this.mouse, this.camera);
-                
-                const stars = [];
-                this.starSystems.forEach(starGroup => {
-                    if (starGroup.children[0]) {
-                        stars.push(starGroup.children[0]);
-                    }
-                });
-                
-                const intersects = this.raycaster.intersectObjects(stars);
-                
-                if (intersects.length > 0) {
-                    const starMesh = intersects[0].object;
-                    const starGroup = starMesh.parent;
-                    const comment = starGroup.userData.config?.comment;
-                    
-                    if (comment && this.hoveredStar !== starGroup) {
-                        console.log('Hovering over star:', comment.username);
-                        this.hoveredStar = starGroup;
-                        this.isHovering = true;
-                        this.autoRotate = false;
-                        this.showTooltip(comment, intersects[0].point);
-                    }
-                } else {
-                    if (this.hoveredStar) {
-                        console.log('No longer hovering');
-                        this.hoveredStar = null;
-                        this.isHovering = false;
-                        // Don't immediately resume auto-rotation to prevent bouncing
-                        setTimeout(() => {
-                            if (!this.isHovering && !this.mouseDown) {
-                                this.autoRotate = true;
-                            }
-                        }, 500); // Half second delay before auto-rotation resumes
-                        this.hideTooltip();
-                    }
-                }
-            }
-            
+            // Hover detection with proper delays
+			checkStarHover() {
+				if (this.isLoading || this.mouseDown) return;
+				
+				this.raycaster.setFromCamera(this.mouse, this.camera);
+				
+				const starMeshes = [];
+				this.starSystems.forEach(starGroup => {
+					// Include both the main star mesh (index 0) and glow mesh (index 1)
+					if (starGroup.children[0]) {
+						starMeshes.push(starGroup.children[0]); // Main star
+					}
+					if (starGroup.children[1]) {
+						starMeshes.push(starGroup.children[1]); // Glow
+					}
+					// Also include any saved glow effects
+					starGroup.children.forEach(child => {
+						if (child.userData.isSavedGlow) {
+							starMeshes.push(child);
+						}
+					});
+				});
+				
+				const intersects = this.raycaster.intersectObjects(starMeshes);
+				
+				if (intersects.length > 0) {
+					const intersectedMesh = intersects[0].object;
+					const starGroup = intersectedMesh.parent;
+					const comment = starGroup.userData.config?.comment;
+					
+					if (comment && comment !== this.currentHoveredComment) {
+						console.log('🌟 Hovering new star/glow:', comment.username);
+						this.currentHoveredComment = comment;
+						this.hoveredStar = starGroup;
+						this.autoRotate = false;
+						this.showTooltipWithDelay(comment, intersects[0].point);
+					} else if (comment && comment === this.currentHoveredComment) {
+						// Still hovering the same star - ensure read timer is running if tooltip is visible
+						const tooltip = document.getElementById('star-tooltip');
+						const tooltipVisible = tooltip && tooltip.classList.contains('visible');
+						if (tooltipVisible && !this.readTimer && !starGroup.userData.config.isRead) {
+							console.log('⏰ Restarting read timer for continued hover:', comment.username);
+							this.startReadTimer(comment);
+						}
+					}
+				} else {
+					// Clear star hover state properly, but don't clear read timer if tooltip is still visible
+					if (this.currentHoveredComment && !this.isHoveringTooltip) {
+						console.log('⭐ Left star area, tooltip still visible - keeping read timer');
+						this.currentHoveredComment = null;
+						// Don't clear hoveredStar yet if tooltip is visible (needed for read timer)
+						if (!this.tooltipVisible) {
+							this.hoveredStar = null;
+						}
+						this.hideTooltipWithDelay();
+					}
+					
+					// Always attempt to restore auto-rotation when not hovering anything
+					if (!this.mouseDown && !this.isHoveringTooltip && !this.currentHoveredComment) {
+						if (this.isHoveringCanvas && this.controlsEnabled) {
+							this.setCursor('grab');
+						}
+						
+						setTimeout(() => {
+							if (!this.currentHoveredComment && !this.isHoveringTooltip && !this.mouseDown) {
+								this.autoRotate = true;
+								console.log('🔄 Auto-rotation resumed (no hover targets)');
+							}
+						}, 200);
+					}
+				}
+			}
+
             createStarMapFromComments() {
-                const comments = this.commentData.comments.filter(c => c.id !== 'no_comments');
-                console.log('Creating stars for', comments.length, 'comments');
-                
-                if (comments.length === 0) {
-                    this.createSingleStar();
-                    return;
-                }
-                
-                comments.forEach((comment, index) => {
-                    const likes = comment.likes || 0;
-                    const contentLength = comment.content ? comment.content.length : 0;
-                    
-                    // Size based on character count (10-256+ characters)
-                    const minSize = 0.3;
-                    const maxSize = 1.0;
-                    const minChars = 10;
-                    const maxChars = 256;
-                    const clampedLength = Math.max(minChars, Math.min(maxChars, contentLength));
-                    const sizeProgress = (clampedLength - minChars) / (maxChars - minChars);
-                    const starSize = minSize + (sizeProgress * (maxSize - minSize));
-                    
-                    // Color based on likes with smooth transitions
-                    let starColor;
-                    if (likes === 0) {
-                        starColor = 0xE6F3FF; // White-blue for no likes
-                    } else if (likes <= 3) {
-                        // White (0 likes) to White (3 likes)
-                        starColor = 0xFFFFFF;
-                    } else if (likes <= 7) {
-                        // White-yellow to Yellow (4-7 likes)
-                        const progress = (likes - 4) / 3; // 0 to 1
-                        const r = 255;
-                        const g = 255;
-                        const b = Math.floor(255 - (progress * 100)); // 255 to 155
-                        starColor = (r << 16) | (g << 8) | b;
-                    } else if (likes <= 12) {
-                        // Yellow-orange to Orange (8-12 likes)
-                        const progress = (likes - 8) / 4; // 0 to 1
-                        const r = 255;
-                        const g = Math.floor(255 - (progress * 90)); // 255 to 165
-                        const b = Math.floor(155 - (progress * 155)); // 155 to 0
-                        starColor = (r << 16) | (g << 8) | b;
-                    } else {
-                        // Red for 15+ likes
-                        starColor = 0xFF4444;
-                    }
-                    
-                    const intensity = Math.max(0.8, Math.min(2.0, 1.0 + (likes * 0.05)));
-                    
-                    console.log(`Star ${index + 1}: ${comment.username}, chars=${contentLength}, likes=${likes}, size=${starSize.toFixed(2)}, color=#${starColor.toString(16)}`);
-                    
-                    // Improved positioning - keep stars above projector and within screen bounds
-                    const radiusMin = 2.5; // Minimum distance from center
-                    const radiusMax = 5.5; // Maximum distance from center  
-                    const radius = radiusMin + Math.random() * (radiusMax - radiusMin);
-                    
-                    // Angle around the circle - spread evenly with some randomness
-                    const baseTheta = (index / comments.length) * Math.PI * 2;
-                    const thetaVariation = (Math.random() - 0.5) * 0.8; // Less random variation
-                    const theta = baseTheta + thetaVariation;
-                    
-                    // Vertical positioning - keep above projector
-                    const minY = -0.5; // Don't go too far below center
-                    const maxY = 3.0;   // Extend upward
-                    const yPosition = minY + Math.random() * (maxY - minY);
-                    
-                    // Bias toward upper positions to avoid projector
-                    const biasedY = yPosition + Math.random() * 1.5;
-                    
-                    const x = radius * Math.cos(theta);
-                    const y = Math.min(maxY, biasedY); // Cap maximum height
-                    const z = radius * Math.sin(theta);
-                    
-                    const starGroup = this.createStarSystem({
-                        size: starSize,
-                        color: starColor,
-                        intensity: intensity,
-                        position: { x, y, z },
-                        comment: comment,
-                        delay: index * 0.2
-                    });
-                    
-                    this.starSystems.push(starGroup);
-                    this.scene.add(starGroup);
-                });
-            }
-            
+				const comments = this.commentData.comments.filter(c => c.id !== 'no_comments');
+				console.log('Creating stars for', comments.length, 'comments');
+				
+				if (comments.length === 0) {
+					this.createSingleStar();
+					return;
+				}
+				
+				comments.forEach((comment, index) => {
+					const likes = comment.likes || 0;
+					const contentLength = comment.content ? comment.content.length : 0;
+					
+					// TEMPORARY FIX: Force completely consistent sizing based ONLY on likes
+					let starSize;
+					if (likes === 0) {
+						starSize = 0.5; // Force exact same size for all 0-like comments
+					} else if (likes === 1) {
+						starSize = 0.6; // Force exact same size for all 1-like comments
+					} else {
+						// Only for higher likes, use normal calculation
+						const baseSize = 0.5;
+						const maxMultiplier = 3.0;
+						const maxLikesForSize = 20;
+						const sizeMultiplier = 1 + Math.min(likes / maxLikesForSize, 1) * (maxMultiplier - 1);
+						starSize = baseSize * sizeMultiplier;
+					}
+
+					// Size fix applied - all stars with same like count now have identical sizes
+										
+					// COLOR based on character count
+					let starColor;
+					if (contentLength <= 25) {
+						starColor = 0xE6F3FF;
+					} else if (contentLength <= 50) {
+						const progress = (contentLength - 25) / 25;
+						const r = Math.floor(230 + (progress * 25));
+						const g = Math.floor(243 + (progress * 12));
+						const b = 255;
+						starColor = (r << 16) | (g << 8) | b;
+					} else if (contentLength <= 75) {
+						const progress = (contentLength - 50) / 25;
+						const r = 255;
+						const g = 255;
+						const b = Math.floor(255 - (progress * 30));
+						starColor = (r << 16) | (g << 8) | b;
+					} else if (contentLength <= 100) {
+						const progress = (contentLength - 75) / 25;
+						const r = 255;
+						const g = 255;
+						const b = Math.floor(225 - (progress * 75));
+						starColor = (r << 16) | (g << 8) | b;
+					} else if (contentLength <= 150) {
+						const progress = (contentLength - 100) / 50;
+						const r = 255;
+						const g = Math.floor(255 - (progress * 40));
+						const b = Math.floor(150 - (progress * 50));
+						starColor = (r << 16) | (g << 8) | b;
+					} else if (contentLength <= 200) {
+						const progress = (contentLength - 150) / 50;
+						const r = 255;
+						const g = Math.floor(215 - (progress * 50));
+						const b = Math.floor(100 - (progress * 100));
+						starColor = (r << 16) | (g << 8) | b;
+					} else if (contentLength <= 250) {
+						const progress = (contentLength - 200) / 50;
+						const r = 255;
+						const g = Math.floor(165 - (progress * 65));
+						const b = 0;
+						starColor = (r << 16) | (g << 8) | b;
+					} else {
+						const progress = Math.min((contentLength - 250) / 50, 1);
+						const r = 255;
+						const g = Math.floor(100 - (progress * 100));
+						const b = 0;
+						starColor = (r << 16) | (g << 8) | b;
+					}
+					
+					// Temporarily standardize intensity to see if this fixes the visual size issue
+					const intensity = 1.0; // Fixed intensity for all stars to test visual consistency
+
+					// Debug: Log intensity for 0-1 like stars
+					if (likes <= 1) {
+						console.log(`Intensity debug: likes=${likes}, intensity=${intensity}, content="${comment.content?.substring(0, 20) || 'N/A'}"`);
+					}
+
+					// Debug: Log intensity for 0-1 like stars
+					if (likes <= 1) {
+						console.log(`Intensity debug: likes=${likes}, intensity=${intensity}, content="${comment.content?.substring(0, 20) || 'N/A'}"`);
+					}
+					
+					// Positioning
+					const radiusMin = 2.5;
+					const radiusMax = 5.5;
+					const radius = radiusMin + Math.random() * (radiusMax - radiusMin);
+					
+					const baseTheta = (index / comments.length) * Math.PI * 2;
+					const thetaVariation = (Math.random() - 0.5) * 0.8;
+					const theta = baseTheta + thetaVariation;
+					
+					const minY = -0.5;
+					const maxY = 3.0;
+					const yPosition = minY + Math.random() * (maxY - minY);
+					const biasedY = yPosition + Math.random() * 1.5;
+					
+					const x = radius * Math.cos(theta);
+					const y = Math.min(maxY, biasedY);
+					const z = radius * Math.sin(theta);
+					
+					const starGroup = this.createStarSystem({
+						size: starSize,
+						color: starColor,
+						intensity: intensity,
+						position: { x, y, z },
+						comment: comment,
+						delay: index * 0.2,
+						originalSize: starSize,
+						originalColor: starColor,
+						isRead: false
+					});
+					
+					this.starSystems.push(starGroup);
+					this.scene.add(starGroup);
+				});
+			}
+
             createSingleStar() {
                 const starGroup = this.createStarSystem({
                     size: 0.8,
@@ -1013,19 +1262,23 @@
             }
             
             createStarSystem(config) {
-                const starGroup = new THREE.Group();
-                
-                const starGeometry = new THREE.SphereGeometry(config.size * 0.15, 8, 8); // Reduced from 0.2 to 0.15 (25% smaller)
-                const starMaterial = new THREE.MeshBasicMaterial({ 
-                    color: config.color,
-                    transparent: true,
-                    opacity: 0
-                });
-                
-                const star = new THREE.Mesh(starGeometry, starMaterial);
-                starGroup.add(star);
-                
-                const glowGeometry = new THREE.SphereGeometry(config.size * 0.45, 8, 8); // Reduced from 0.6 to 0.45 (25% smaller)
+				const starGroup = new THREE.Group();
+				
+				// Geometry created with consistent sizing
+
+				const starGeometry = new THREE.SphereGeometry(config.size * 0.15, 8, 8);
+				const starMaterial = new THREE.MeshBasicMaterial({ 
+					color: config.color,
+					transparent: true,
+					opacity: 0
+				});
+				
+				const star = new THREE.Mesh(starGeometry, starMaterial);
+				starGroup.add(star);
+				
+				const glowGeometry = new THREE.SphereGeometry(config.size * 0.45, 8, 8);
+
+				// Glow created with consistent sizing
                 const glowMaterial = new THREE.ShaderMaterial({
                     uniforms: {
                         time: { value: 0 },
@@ -1075,14 +1328,13 @@
             }
             
             createAtmosphericParticles() {
-                const particleCount = 80; // Increased from 50
+                const particleCount = 80;
                 const particleGeometry = new THREE.BufferGeometry();
                 const positions = new Float32Array(particleCount * 3);
                 const sizes = new Float32Array(particleCount);
                 
                 for (let i = 0; i < particleCount; i++) {
-                    // Create particles in a large sphere around the galaxy
-                    const radius = 12 + Math.random() * 15; // Closer particles
+                    const radius = 12 + Math.random() * 15;
                     const theta = Math.random() * Math.PI * 2;
                     const phi = Math.acos(2 * Math.random() - 1);
                     
@@ -1090,7 +1342,7 @@
                     positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
                     positions[i * 3 + 2] = radius * Math.cos(phi);
                     
-                    sizes[i] = Math.random() * 0.8 + 0.2; // Slightly larger
+                    sizes[i] = Math.random() * 0.8 + 0.2;
                 }
                 
                 particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -1099,7 +1351,7 @@
                 const particleMaterial = new THREE.ShaderMaterial({
                     uniforms: {
                         time: { value: 0 },
-                        opacity: { value: 0.4 } // Increased opacity
+                        opacity: { value: 0.4 }
                     },
                     vertexShader: `
                         attribute float size;
@@ -1133,15 +1385,14 @@
             }
             
             createBackgroundStars() {
-                const backgroundStarCount = 500; // Increased from 200
+                const backgroundStarCount = 500;
                 const starGeometry = new THREE.BufferGeometry();
                 const positions = new Float32Array(backgroundStarCount * 3);
                 const colors = new Float32Array(backgroundStarCount * 3);
                 const sizes = new Float32Array(backgroundStarCount);
                 
                 for (let i = 0; i < backgroundStarCount; i++) {
-                    // Create background stars in a much larger sphere
-                    const radius = 25 + Math.random() * 80; // Wider range
+                    const radius = 25 + Math.random() * 80;
                     const theta = Math.random() * Math.PI * 2;
                     const phi = Math.acos(2 * Math.random() - 1);
                     
@@ -1149,29 +1400,24 @@
                     positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
                     positions[i * 3 + 2] = radius * Math.cos(phi);
                     
-                    // Fixed: Added colorType variable declaration
                     const colorType = Math.random();
                     
-                    // Blue-white stars
                     if (colorType < 0.6) {
-                        // Blue-white stars - much brighter
-                        colors[i * 3] = 0.9 + Math.random() * 0.1;     // Red
-                        colors[i * 3 + 1] = 0.95 + Math.random() * 0.05; // Green  
-                        colors[i * 3 + 2] = 1.0;                       // Blue
+                        colors[i * 3] = 0.9 + Math.random() * 0.1;
+                        colors[i * 3 + 1] = 0.95 + Math.random() * 0.05;
+                        colors[i * 3 + 2] = 1.0;
                     } else if (colorType < 0.8) {
-                        // White stars - very bright
                         const intensity = 0.95 + Math.random() * 0.05;
                         colors[i * 3] = intensity;
                         colors[i * 3 + 1] = intensity;
                         colors[i * 3 + 2] = intensity;
                     } else {
-                        // Yellow-orange stars - brighter
-                        colors[i * 3] = 1.0;                           // Red
-                        colors[i * 3 + 1] = 0.9 + Math.random() * 0.1; // Green
-                        colors[i * 3 + 2] = 0.4 + Math.random() * 0.2; // Blue
+                        colors[i * 3] = 1.0;
+                        colors[i * 3 + 1] = 0.9 + Math.random() * 0.1;
+                        colors[i * 3 + 2] = 0.4 + Math.random() * 0.2;
                     }
                     
-                    sizes[i] = Math.random() * 2.0 + 0.5; // Larger stars
+                    sizes[i] = Math.random() * 2.0 + 0.5;
                 }
                 
                 starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -1181,7 +1427,7 @@
                 const backgroundStarMaterial = new THREE.ShaderMaterial({
                     uniforms: {
                         time: { value: 0 },
-                        opacity: { value: 0.9 } // Increased opacity
+                        opacity: { value: 0.9 }
                     },
                     vertexShader: `
                         attribute float size;
@@ -1206,7 +1452,7 @@
                             if (dist > 0.5) discard;
                             
                             float alpha = 1.0 - smoothstep(0.0, 0.5, dist);
-                            float center = 1.0 - smoothstep(0.0, 0.2, dist); // Brighter center
+                            float center = 1.0 - smoothstep(0.0, 0.2, dist);
                             gl_FragColor = vec4(vColor * (1.0 + center), alpha * opacity);
                         }
                     `,
@@ -1276,44 +1522,511 @@
                 this.scene.add(line);
             }
             
-            showTooltip(comment, worldPosition) {
-                const screenPosition = worldPosition.clone().project(this.camera);
-                const canvas = document.getElementById('hologram-canvas');
-                const rect = canvas.getBoundingClientRect();
-                
-                const x = (screenPosition.x * 0.5 + 0.5) * rect.width + rect.left;
-                const y = (screenPosition.y * -0.5 + 0.5) * rect.height + rect.top;
-                
-                const tooltip = this.tooltip;
-                const avatar = document.getElementById('tooltip-avatar');
-                const username = document.getElementById('tooltip-username');
-                const content = document.getElementById('tooltip-content');
-                const likes = document.getElementById('tooltip-likes');
-                const date = document.getElementById('tooltip-date');
-                
-                username.textContent = comment.username || 'Unknown User';
-                content.textContent = comment.content || 'No content';
-                likes.textContent = `❤️ ${comment.likes || 0} likes`;
-                date.textContent = `📅 ${formatDate(comment.createdAt)}`;
-                
-                if (comment.profileImage) {
-                    avatar.src = comment.profileImage;
-                    avatar.style.display = 'block';
-                } else {
-                    avatar.style.display = 'none';
-                }
-                
-                tooltip.style.left = `${Math.min(x + 10, window.innerWidth - 320)}px`;
-                tooltip.style.top = `${Math.max(y - 50, 10)}px`;
-                tooltip.classList.add('visible');
-            }
+            // Simplified tooltip with proper interaction
+			showTooltip(comment, worldPosition) {
+				const screenPosition = worldPosition.clone().project(this.camera);
+				const canvas = document.getElementById('hologram-canvas');
+				const rect = canvas.getBoundingClientRect();
+				
+				const x = (screenPosition.x * 0.5 + 0.5) * rect.width + rect.left;
+				const y = (screenPosition.y * -0.5 + 0.5) * rect.height + rect.top;
+				
+				// Always get fresh tooltip reference
+				this.tooltip = document.getElementById('star-tooltip');
+				const tooltip = this.tooltip;
+				const avatar = document.getElementById('tooltip-avatar');
+				const username = document.getElementById('tooltip-username');
+				const content = document.getElementById('tooltip-content');
+				const likes = document.getElementById('tooltip-likes');
+				const date = document.getElementById('tooltip-date');
+				
+				username.textContent = comment.username || 'Unknown User';
+				content.textContent = comment.content || 'No content';
+				likes.textContent = `❤️ ${comment.likes || 0} likes`;
+				date.textContent = `📅 ${formatDate(comment.createdAt)}`;
+				
+				if (comment.profileImage) {
+					avatar.src = comment.profileImage;
+					avatar.style.display = 'block';
+				} else {
+					avatar.style.display = 'none';
+				}
+				
+				// Add or update save button
+				let saveButton = tooltip.querySelector('.tooltip-save-button');
+				if (!saveButton) {
+					saveButton = document.createElement('button');
+					saveButton.className = 'tooltip-save-button';
+					tooltip.appendChild(saveButton);
+				}
+				
+				const commentId = comment.id || `${comment.username}_${comment.content}_${comment.createdAt}` || comment.username;
+				const isSaved = this.savedStars.has(commentId);
+				saveButton.textContent = isSaved ? '⭐ Unsave Comment' : '💾 Save Comment';
+				saveButton.className = `tooltip-save-button ${isSaved ? 'saved' : ''}`;
+				
+				// Proper button event handling with cloning to prevent multiple listeners
+				const newSaveButton = saveButton.cloneNode(true);
+				saveButton.parentNode.replaceChild(newSaveButton, saveButton);
+
+				newSaveButton.addEventListener('click', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					console.log('💾 Save button clicked for:', comment.username);
+					
+					this.toggleSaveComment(comment);
+					
+					const newSavedState = this.savedStars.has(commentId);
+					newSaveButton.textContent = newSavedState ? '⭐ Unsave Comment' : '💾 Save Comment';
+					newSaveButton.className = `tooltip-save-button ${newSavedState ? 'saved' : ''}`;
+					
+					// Don't break interaction flow after button click
+					this.isHoveringButton = false;
+					console.log('💾 Save action completed, states preserved');
+				});
+
+				newSaveButton.addEventListener('mouseenter', () => {
+					this.isHoveringButton = true;
+					console.log('🔘 Hovering save button');
+				});
+
+				newSaveButton.addEventListener('mouseleave', () => {
+					this.isHoveringButton = false;
+					console.log('🔘 Left save button');
+				});
+				
+				// Position tooltip
+				let tooltipX = x + 15;
+				let tooltipY = y - 60;
+				
+				const estimatedWidth = Math.min(450, Math.max(200, (comment.content || '').length * 8 + 100));
+				const estimatedHeight = 150;
+				
+				if (tooltipX + estimatedWidth > window.innerWidth - 20) {
+					tooltipX = x - estimatedWidth - 15;
+				}
+				
+				if (tooltipX < 20) {
+					tooltipX = 20;
+				}
+				
+				if (tooltipY < 20) {
+					tooltipY = y + 20;
+				} else if (tooltipY + estimatedHeight > window.innerHeight - 20) {
+					tooltipY = window.innerHeight - estimatedHeight - 20;
+				}
+				
+				tooltip.style.left = `${tooltipX}px`;
+				tooltip.style.top = `${tooltipY}px`;
+				
+				// Set up proper tooltip interaction
+				this.setupTooltipInteraction();
+				
+				// Show tooltip
+				tooltip.classList.add('visible', 'interactive');
+				this.tooltipVisible = true;
+
+				console.log('Tooltip shown and interactive for:', comment.username);
+
+				// Start read timer when tooltip becomes visible (but not for saved stars)
+				this.startReadTimer(comment);
+			}
+			
+			// Proper tooltip interaction with delayed hide/show
+			setupTooltipInteraction() {
+				// Ensure we have fresh tooltip reference
+				this.tooltip = document.getElementById('star-tooltip');
+				if (this.boundTooltipEnter) {
+					this.tooltip.removeEventListener('mouseenter', this.boundTooltipEnter);
+					this.boundTooltipEnter = null;
+				}
+				if (this.boundTooltipLeave) {
+					this.tooltip.removeEventListener('mouseleave', this.boundTooltipLeave);
+					this.boundTooltipLeave = null;
+				}
+				
+				this.boundTooltipEnter = () => {
+					console.log('🎯 Mouse entered tooltip');
+					this.isHoveringTooltip = true;
+					this.autoRotate = false;
+					this.clearTooltipTimeouts(false); // Don't clear read timer when entering tooltip
+					this.setCursor('default');
+					
+					// Restart read timer if we have a hovered star and tooltip is visible
+					if (this.hoveredStar && this.hoveredStar.userData.config?.comment) {
+						const comment = this.hoveredStar.userData.config.comment;
+						console.log('⏱️ Restarting read timer from tooltip hover for:', comment.username);
+						this.startReadTimer(comment);
+					}
+				};
+				
+				this.boundTooltipLeave = () => {
+					console.log('❌ Mouse left tooltip');
+					this.isHoveringTooltip = false;
+					this.hideTooltipWithDelay();
+					
+					// Clear hoveredStar since we're no longer interacting with star or tooltip
+					if (!this.currentHoveredComment) {
+						this.hoveredStar = null;
+					}
+					
+					// Restore proper cursor and state
+					if (this.isHoveringCanvas && this.controlsEnabled) {
+						this.setCursor('grab');
+					}
+				};
+				
+				this.tooltip.addEventListener('mouseenter', this.boundTooltipEnter);
+				this.tooltip.addEventListener('mouseleave', this.boundTooltipLeave);
+				
+				console.log('✅ Tooltip interaction handlers refreshed');
+			}
+			
+			// Clear all tooltip-related timeouts
+			clearTooltipTimeouts(includeReadTimer = true) {
+				if (this.showTooltipTimeout) {
+					clearTimeout(this.showTooltipTimeout);
+					this.showTooltipTimeout = null;
+				}
+				if (this.hideTooltipTimeout) {
+					clearTimeout(this.hideTooltipTimeout);
+					this.hideTooltipTimeout = null;
+				}
+				if (includeReadTimer && this.readTimer) {
+					clearTimeout(this.readTimer);
+					this.readTimer = null;
+					console.log('⏹️ Read timer cleared');
+				}
+			}
+
+			// Show tooltip with delay
+			showTooltipWithDelay(comment, worldPosition) {
+				this.clearTooltipTimeouts();
+				
+				this.showTooltipTimeout = setTimeout(() => {
+					if (comment === this.currentHoveredComment) {
+						this.showTooltip(comment, worldPosition);
+					}
+				}, 100); // Short delay to prevent flicker
+			}
+
+			// Hide tooltip with delay
+			hideTooltipWithDelay() {
+				// Clear show/hide timeouts but NOT the read timer
+				if (this.showTooltipTimeout) {
+					clearTimeout(this.showTooltipTimeout);
+					this.showTooltipTimeout = null;
+				}
+				if (this.hideTooltipTimeout) {
+					clearTimeout(this.hideTooltipTimeout);
+					this.hideTooltipTimeout = null;
+				}
+				
+				this.hideTooltipTimeout = setTimeout(() => {
+					if (!this.isHoveringTooltip) {
+						this.hideTooltip();
+					}
+				}, 200); // Longer delay for better UX
+			}
+
+			// Immediate tooltip hide (for mouse down, etc.)
+			hideTooltipImmediate() {
+				this.clearTooltipTimeouts();
+				this.hideTooltip();
+			}
             
             hideTooltip() {
-                this.tooltip.classList.remove('visible');
-            }
+				const tooltip = this.tooltip;
+				tooltip.classList.remove('visible', 'interactive');
+				
+				// Clear all timers including read timer
+				this.clearTooltipTimeouts();
+				
+				// Complete state reset with proper recovery
+				this.isHoveringTooltip = false;
+				this.currentHoveredComment = null;
+				this.hoveredStar = null;
+				
+				console.log('❌ Tooltip hidden - states reset');
+				
+				// Restore interaction capabilities
+				if (this.controlsEnabled) {
+					if (this.isHoveringCanvas) {
+						this.setCursor('grab');
+					} else {
+						this.setCursor('default');
+					}
+					
+					// Multiple recovery attempts for auto-rotation
+					const attemptRecovery = () => {
+						if (!this.isHoveringTooltip && !this.currentHoveredComment && !this.mouseDown) {
+							this.autoRotate = true;
+							console.log('🔄 Auto-rotation force recovered');
+							return true;
+						}
+						return false;
+					};
+					
+					// Try recovery at multiple intervals
+					setTimeout(attemptRecovery, 100);
+					setTimeout(attemptRecovery, 300);
+					setTimeout(attemptRecovery, 600);
+				}
+			}
+			
+			// Start read timer for a comment
+			startReadTimer(comment) {
+				// Clear any existing read timer
+				if (this.readTimer) {
+					clearTimeout(this.readTimer);
+					this.readTimer = null;
+				}
+				
+				if (!this.hoveredStar || this.hoveredStar.userData.config.isRead) {
+					return;
+				}
+				
+				const commentId = comment.id || `${comment.username}_${comment.content}_${comment.createdAt}` || comment.username;
+				const isSaved = this.savedStars.has(commentId);
+				
+				if (!isSaved) {
+					console.log('⏱️ Starting read timer for:', comment.username);
+					this.readTimer = setTimeout(() => {
+						// Check if user is still interacting with this star or its tooltip
+						const tooltip = document.getElementById('star-tooltip');
+						const tooltipVisible = tooltip && tooltip.classList.contains('visible');
+						const stillHoveringThisStar = this.hoveredStar && 
+							this.hoveredStar.userData.config?.comment === comment;
+						const stillInteracting = tooltipVisible || this.isHoveringTooltip || stillHoveringThisStar;
+						
+						// Double-check it's still not saved before marking as read
+						const stillNotSaved = !this.savedStars.has(commentId);
+						
+						if (stillNotSaved && this.hoveredStar && !this.hoveredStar.userData.config.isRead && stillInteracting) {
+							console.log('📖 Marking as read after interaction timer:', comment.username);
+							this.markStarAsRead(this.hoveredStar);
+						} else {
+							console.log('⏹️ Read timer expired but conditions not met - not marking as read');
+						}
+					}, 500);
+				}
+			}
+
+			// Toggle save state for a comment
+			toggleSaveComment(comment) {
+				const commentId = comment.id || `${comment.username}_${comment.content}_${comment.createdAt}` || comment.username;
+				
+				// Clear read timer when saving/unsaving to prevent automatic read marking
+				if (this.readTimer && this.hoveredStar && this.hoveredStar.userData.config?.comment) {
+					const hoveredCommentId = this.hoveredStar.userData.config.comment.id || `${this.hoveredStar.userData.config.comment.username}_${this.hoveredStar.userData.config.comment.content}_${this.hoveredStar.userData.config.comment.createdAt}` || this.hoveredStar.userData.config.comment.username;
+					if (hoveredCommentId === commentId) {
+						clearTimeout(this.readTimer);
+						this.readTimer = null;
+						console.log('⏹️ Read timer cleared due to save/unsave action');
+					}
+				}
+				
+				if (this.savedStars.has(commentId)) {
+					this.savedStars.delete(commentId);
+					console.log('Unsaved comment:', comment.username);
+				} else {
+					this.savedStars.add(commentId);
+					console.log('💫 Saved comment:', comment.username);
+				}
+				
+				// Update appearance and force interaction recovery
+				this.updateStarSavedAppearance(comment, this.savedStars.has(commentId));
+
+				// Force restore interaction state
+				setTimeout(() => {
+					this.mouseDown = false;
+					this.autoRotate = true;
+					this.setCursor('grab');
+					console.log('🔄 Forced interaction recovery after save');
+				}, 100);
+			}
+			
+			// Update star appearance based on saved state - DEBUG VERSION
+			updateStarSavedAppearance(comment, isSaved) {
+				const commentId = comment.id || `${comment.username}_${comment.content}_${comment.createdAt}` || comment.username;
+				console.log('🔍 Looking for star with ID:', commentId);
+				
+				const starGroup = this.starSystems.find(star => {
+					const starComment = star.userData.config?.comment;
+					if (!starComment) return false;
+					
+					const starCommentId = starComment.id || `${starComment.username}_${starComment.content}_${starComment.createdAt}` || starComment.username;
+					return starCommentId === commentId;
+				});
+				
+				if (!starGroup) {
+					console.log('❌ Could not find star for comment:', comment.content.substring(0, 20));
+					return;
+				}
+				
+				console.log('✅ Found star, current scale:', starGroup.scale.x, 'isSaved:', isSaved);
+				
+				// ADD COLOR AND SIZE CHANGE
+				const starMesh = starGroup.children[0];
+				if (isSaved) {
+					console.log('⭐ Making star golden and larger:', comment.content.substring(0, 20));
+					if (starMesh?.material) {
+						starMesh.material.color.setHex(0xFFD700); // Golden
+					}
+					// Also update the main glow to golden
+					const glowMesh = starGroup.children[1];
+					if (glowMesh?.material?.uniforms) {
+						glowMesh.material.uniforms.color.value = new THREE.Color(0xFFD700);
+						glowMesh.material.uniforms.intensity.value = 2.0;
+					}
+					// Make bigger - multiply current scale by 1.5
+					const currentScale = starGroup.scale.x;
+					const newScale = currentScale * 1.5;
+					starGroup.scale.set(newScale, newScale, newScale);
+					console.log('📏 Scale changed from', currentScale, 'to', newScale);
+					// Add golden glow effect
+					this.addSavedStarGlow(starGroup);
+				} else {
+					console.log('🔄 Restoring original color and size:', comment.content.substring(0, 20));
+					if (starMesh?.material) {
+						const originalColor = starGroup.userData.config.originalColor;
+						const isRead = starGroup.userData.config.isRead;
+						starMesh.material.color.setHex(isRead ? 0x808080 : originalColor);
+					}
+					// Also restore the main glow color
+					const glowMesh = starGroup.children[1];
+					if (glowMesh?.material?.uniforms) {
+						const isRead = starGroup.userData.config.isRead;
+						const originalColor = starGroup.userData.config.originalColor;
+						glowMesh.material.uniforms.color.value = new THREE.Color(isRead ? 0x606060 : originalColor);
+						glowMesh.material.uniforms.intensity.value = isRead ? 0.2 : (starGroup.userData.config.intensity || 1.0);
+					}
+					// Reset to scale of 1.0 or smaller if it was read
+					const isRead = starGroup.userData.config.isRead;
+					const targetScale = isRead ? 0.5 : 1.0;
+					starGroup.scale.set(targetScale, targetScale, targetScale);
+					console.log('📏 Scale reset to', targetScale);
+					// Remove golden glow effect
+					this.removeSavedStarGlow(starGroup);
+				}
+			}
+			
+			// Add golden glow effect for saved stars
+			addSavedStarGlow(starGroup) {
+				this.removeSavedStarGlow(starGroup);
+				
+				const starSize = starGroup.userData.config.size || 0.5;
+				const glowGeometry = new THREE.SphereGeometry(starSize * 0.45, 16, 16);
+				
+				const glowMaterial = new THREE.ShaderMaterial({
+					uniforms: {
+						time: { value: 0 },
+						color: { value: new THREE.Color(0xFFD700) },
+						intensity: { value: 1.5 }
+					},
+					vertexShader: `
+						varying vec3 vNormal;
+						varying vec3 vPosition;
+						void main() {
+							vNormal = normalize(normalMatrix * normal);
+							vPosition = position;
+							gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+						}
+					`,
+					fragmentShader: `
+						uniform float time;
+						uniform vec3 color;
+						uniform float intensity;
+						varying vec3 vNormal;
+						varying vec3 vPosition;
+						
+						void main() {
+							float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 1.0);
+							float pulse = sin(time * 2.0 + length(vPosition) * 3.0) * 0.3 + 0.7;
+							float alpha = fresnel * pulse * intensity * 0.8;
+							gl_FragColor = vec4(color, alpha);
+						}
+					`,
+					transparent: true,
+					blending: THREE.AdditiveBlending,
+					side: THREE.BackSide
+				});
+				
+				const savedGlow = new THREE.Mesh(glowGeometry, glowMaterial);
+				savedGlow.userData.isSavedGlow = true;
+				starGroup.add(savedGlow);
+				
+				console.log('🌟 Added golden glow to saved star');
+			}
+			
+			// Remove golden glow effect
+			removeSavedStarGlow(starGroup) {
+				const savedGlow = starGroup.children.find(child => child.userData.isSavedGlow);
+				if (savedGlow) {
+					starGroup.remove(savedGlow);
+					if (savedGlow.geometry) savedGlow.geometry.dispose();
+					if (savedGlow.material) savedGlow.material.dispose();
+					console.log('🗑️ Removed golden glow from star');
+				}
+			}
             
+			// Mark star as read
+			markStarAsRead(starGroup) {
+				if (!starGroup || starGroup.userData.config.isRead) return;
+				
+				console.log('📖 Marking star as read:', starGroup.userData.config.comment.username);
+				
+				starGroup.userData.config.isRead = true;
+				
+				const starMesh = starGroup.children[0];
+				const glowMesh = starGroup.children[1];
+				
+				// Don't gray out saved stars
+				const commentId = starGroup.userData.config.comment.id || starGroup.userData.config.comment.username;
+				const isSaved = this.savedStars.has(commentId);
+
+				if (starMesh && starMesh.material && !isSaved) {
+					starMesh.material.color.setHex(0x808080);
+				}
+				
+				// Don't dim glow for saved stars
+				if (glowMesh && glowMesh.material && !isSaved) {
+					if (glowMesh.material.uniforms && glowMesh.material.uniforms.intensity) {
+						glowMesh.material.uniforms.intensity.value = 0.2;
+					}
+					if (glowMesh.material.uniforms && glowMesh.material.uniforms.color) {
+						glowMesh.material.uniforms.color.value.setHex(0x606060);
+					}
+				}
+				
+				// Don't shrink saved stars, only read ones
+				if (!isSaved) {
+					const baseSize = 0.5;
+					const currentScale = starGroup.scale.x;
+					const targetScale = (baseSize / starGroup.userData.originalScale) * currentScale;
+					
+					const startScale = currentScale;
+					const startTime = Date.now();
+					const duration = 500;
+					
+					const animateScale = () => {
+						const elapsed = Date.now() - startTime;
+						const progress = Math.min(elapsed / duration, 1);
+						const easeProgress = 1 - Math.pow(1 - progress, 3);
+						
+						const newScale = startScale + (targetScale - startScale) * easeProgress;
+						starGroup.scale.set(newScale, newScale, newScale);
+						
+						if (progress < 1) {
+							requestAnimationFrame(animateScale);
+						}
+					};
+					
+					animateScale();
+				}
+			}
+
             startHologramSequence() {
-                // Show loading during the actual hologram sequence
                 this.showLoadingOverlay();
                 this.updateLoadingProgress(10, "Initializing holographic projector...");
                 
@@ -1338,129 +2051,157 @@
                     this.updateLoadingProgress(75, "Finalizing galaxy projection...");
                     this.animateStarMap();
                 }, 3000);
-                
-                // Don't complete the loading here - wait for stars to be interactive
             }
             
-            animateStarMap() {
-                this.isAnimating = true;
-                const startTime = Date.now();
-                
-                const animate = () => {
-                    const elapsed = (Date.now() - startTime) / 1000;
-                    
-                    // Phase 1: Burst expansion (0-4s)
-                    if (elapsed < 4) {
-                        const progress = elapsed / 4;
-                        const easeProgress = 1 - Math.pow(1 - progress, 3);
-                        
-                        this.starSystems.forEach((starGroup) => {
-                            const delay = starGroup.userData.delay;
-                            const adjustedProgress = Math.max(0, (progress - delay / 4) * 1.2);
-                            
-                            if (adjustedProgress > 0) {
-                                const scale = Math.min(adjustedProgress, 1);
-                                starGroup.scale.set(scale, scale, scale);
-                                
-                                starGroup.children.forEach(child => {
-                                    if (child.material) {
-                                        if (child.material.opacity !== undefined) {
-                                            child.material.opacity = Math.min(adjustedProgress, 1);
-                                        }
-                                        if (child.material.uniforms && child.material.uniforms.time) {
-                                            child.material.uniforms.time.value = elapsed;
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                        
-                        this.connections.forEach(connection => {
-                            connection.material.uniforms.opacity.value = easeProgress * 0.6;
-                            connection.material.uniforms.time.value = elapsed;
-                        });
-                    }
-                    
-                    // Phase 2: Interactive mode (4s+)
-                    else {
-                        if (!this.controlsEnabled) {
-                            this.controlsEnabled = true;
-                            const canvas = document.getElementById('hologram-canvas');
-                            canvas.style.cursor = 'grab';
-                            console.log('Controls enabled - drag to rotate');
-                            
-                            // Now complete the loading sequence since controls are enabled
-                            this.updateLoadingProgress(90, "Systems online - preparing interface...");
-                            setTimeout(() => {
-                                this.updateLoadingProgress(100, "Galaxy ready for exploration!");
-                                
-                                // Play random sound effect when galaxy is ready
-                                setTimeout(() => {
-                                    this.playRandomSoundEffect();
-                                }, 200);
-                                
-                                setTimeout(() => {
-                                    this.hideLoadingOverlay();
-                                    this.isLoading = false;
-                                    console.log('Hologram sequence complete - fully interactive');
-                                }, 800);
-                            }, 500);
-                        }
-                        
-                        // Apply rotation based on user input or auto-rotate
-                        if (!this.autoRotate && (this.rotationX !== 0 || this.rotationY !== 0)) {
-                            this.scene.rotation.x = this.rotationX;
-                            this.scene.rotation.y = this.rotationY;
-                        } else if (this.autoRotate && !this.isHovering) {
-                            this.scene.rotation.y += 0.0001; // Back to your original perfect speed
-                        }
-                        
-                        // Update camera zoom position if needed
-                        if (this.zoomLevel !== 1.0) {
-                            const baseDistance = 8;
-                            const newDistance = baseDistance / this.zoomLevel;
-                            
-                            // Get current camera direction and apply zoom
-                            const direction = new THREE.Vector3(0, 0, 1);
-                            direction.applyQuaternion(this.camera.quaternion);
-                            direction.multiplyScalar(newDistance);
-                            
-                            this.camera.position.copy(direction);
-                        }
-                        
-                        // Update twinkling effects
-                        this.starSystems.forEach(starGroup => {
-                            starGroup.children.forEach(child => {
-                                if (child.material && child.material.uniforms && child.material.uniforms.time) {
-                                    child.material.uniforms.time.value = elapsed;
-                                }
-                            });
-                        });
-                        
-                        this.connections.forEach(connection => {
-                            connection.material.uniforms.time.value = elapsed;
-                        });
-                        
-                        // Update atmospheric particles
-                        if (this.atmosphericParticles && this.atmosphericParticles.material.uniforms) {
-                            this.atmosphericParticles.material.uniforms.time.value = elapsed;
-                        }
-                        
-                        // Update background stars
-                        if (this.backgroundStars && this.backgroundStars.material.uniforms) {
-                            this.backgroundStars.material.uniforms.time.value = elapsed;
-                        }
-                    }
-                    
-                    this.renderer.render(this.scene, this.camera);
-                    
-                    if (this.isAnimating) {
-                        this.animationFrame = requestAnimationFrame(animate);
-                    }
-                };
-                
-                animate();
-            }
+            // Proper animation loop with working auto-rotation
+			animateStarMap() {
+				this.isAnimating = true;
+				const startTime = Date.now();
+				
+				const animate = () => {
+					const elapsed = (Date.now() - startTime) / 1000;
+					
+					// Phase 1: Burst expansion (0-4s)
+					if (elapsed < 4) {
+						const progress = elapsed / 4;
+						const easeProgress = 1 - Math.pow(1 - progress, 3);
+						
+						this.starSystems.forEach((starGroup) => {
+							const delay = starGroup.userData.delay;
+							const adjustedProgress = Math.max(0, (progress - delay / 4) * 1.2);
+							
+							if (adjustedProgress > 0) {
+								const scale = Math.min(adjustedProgress, 1);
+								const commentId = starGroup.userData.config?.comment?.id || starGroup.userData.config?.comment?.username;
+								const isSaved = this.savedStars.has(commentId);
+								const finalScale = isSaved ? scale * 1.5 : scale;
+								
+								// FORCE CONSISTENT SCALING: Ensure identical scales for same like counts
+								const likes = starGroup.userData.config?.comment?.likes || 0;
+								let forcedScale = finalScale;
+								if (likes === 0 && !isSaved) {
+									forcedScale = scale; // Ensure all 0-like stars have identical scale
+								} else if (likes === 1 && !isSaved) {
+									forcedScale = scale; // Ensure all 1-like stars have identical scale
+								}
+								
+								// Debug: Log scaling during animation
+								if (Math.abs(forcedScale - 1.0) < 0.01) { // When animation is nearly complete
+									console.log(`FORCED Animation scaling: content="${starGroup.userData.config?.comment?.content?.substring(0, 30) || 'N/A'}", originalSize=${starGroup.userData.config?.size}, forcedScale=${forcedScale}, likes=${likes}`);
+								}
+								
+								starGroup.scale.set(forcedScale, forcedScale, forcedScale);
+								
+								starGroup.children.forEach(child => {
+									if (child.material) {
+										if (child.material.opacity !== undefined) {
+											child.material.opacity = Math.min(adjustedProgress, 1);
+										}
+										if (child.material.uniforms && child.material.uniforms.time) {
+											child.material.uniforms.time.value = elapsed;
+										}
+									}
+								});
+							}
+						});
+						
+						this.connections.forEach(connection => {
+							connection.material.uniforms.opacity.value = easeProgress * 0.6;
+							connection.material.uniforms.time.value = elapsed;
+						});
+					}
+					
+					// Phase 2: Interactive mode (4s+)
+					else {
+						if (!this.controlsEnabled) {
+							this.controlsEnabled = true;
+							const canvas = document.getElementById('hologram-canvas');
+							canvas.style.cursor = 'grab';
+							console.log('Controls enabled - drag to rotate');
+							
+							this.updateLoadingProgress(90, "Systems online - preparing interface...");
+							setTimeout(() => {
+								this.updateLoadingProgress(100, "Galaxy ready for exploration!");
+								
+								setTimeout(() => {
+									this.playRandomSoundEffect();
+								}, 200);
+								
+								setTimeout(() => {
+									this.hideLoadingOverlay();
+									this.isLoading = false;
+									
+									// Ensure auto-rotation starts
+									this.autoRotate = true;
+									console.log('🔄 Auto-rotation ENABLED after loading complete');
+								}, 800);
+							}, 500);
+						}
+						
+						// Proper rotation handling
+						if (this.mouseDown) {
+							// Apply manual rotation
+							this.scene.rotation.x = this.rotationX;
+							this.scene.rotation.y = this.rotationY;
+						} else if (this.autoRotate && !this.currentHoveredComment && !this.isHoveringTooltip) {
+							// Auto-rotate from current position
+							this.scene.rotation.y += 0.0001;
+							this.rotationY = this.scene.rotation.y;
+							
+							// Prevent overflow
+							if (this.rotationY > Math.PI * 2) {
+								this.rotationY -= Math.PI * 2;
+								this.scene.rotation.y = this.rotationY;
+							}
+						} else if (!this.autoRotate && (this.rotationX !== 0 || this.rotationY !== 0)) {
+							// Apply stored manual rotation when not auto-rotating
+							this.scene.rotation.x = this.rotationX;
+							this.scene.rotation.y = this.rotationY;
+						}
+						
+						// Update camera zoom
+						if (this.zoomLevel !== 1.0) {
+							const baseDistance = 8;
+							const newDistance = baseDistance / this.zoomLevel;
+							
+							const direction = new THREE.Vector3(0, 0, 1);
+							direction.applyQuaternion(this.camera.quaternion);
+							direction.multiplyScalar(newDistance);
+							
+							this.camera.position.copy(direction);
+						}
+						
+						// Update effects
+						this.starSystems.forEach(starGroup => {
+							starGroup.children.forEach(child => {
+								if (child.material && child.material.uniforms && child.material.uniforms.time) {
+									child.material.uniforms.time.value = elapsed;
+								}
+							});
+						});
+						
+						this.connections.forEach(connection => {
+							connection.material.uniforms.time.value = elapsed;
+						});
+						
+						if (this.atmosphericParticles && this.atmosphericParticles.material.uniforms) {
+							this.atmosphericParticles.material.uniforms.time.value = elapsed;
+						}
+						
+						if (this.backgroundStars && this.backgroundStars.material.uniforms) {
+							this.backgroundStars.material.uniforms.time.value = elapsed;
+						}
+					}
+					
+					this.renderer.render(this.scene, this.camera);
+					
+					if (this.isAnimating) {
+						this.animationFrame = requestAnimationFrame(animate);
+					}
+				};
+				
+				animate();
+			}
             
             dispose() {
                 this.isAnimating = false;
@@ -1469,19 +2210,48 @@
                 }
                 
                 this.hideTooltip();
-                this.scene.rotation.set(0, 0, 0);
-                this.controlsEnabled = false;
-                this.mouseDown = false;
-                this.rotationX = 0;
-                this.rotationY = 0;
-                this.autoRotate = true;
-                this.isHovering = false;
-                this.zoomLevel = 1.0;
                 
-                // Complete cleanup of all objects
+                // Clean up tooltip event listeners
+				const tooltip = this.tooltip;
+				if (tooltip && this.boundTooltipEnter && this.boundTooltipLeave) {
+					tooltip.removeEventListener('mouseenter', this.boundTooltipEnter);
+					tooltip.removeEventListener('mouseleave', this.boundTooltipLeave);
+				}
+				// Clear bound methods
+				this.boundTooltipEnter = null;
+				this.boundTooltipLeave = null;
+				// Reset tooltip state
+				if (tooltip) {
+					tooltip.classList.remove('visible', 'interactive');
+					// Force remove any save buttons that might be lingering
+					const saveButtons = tooltip.querySelectorAll('.tooltip-save-button');
+					saveButtons.forEach(button => button.remove());
+				}
+				// Reset all tooltip-related properties
+				this.tooltip = null;
+				this.tooltipVisible = false;
+				this.isHoveringTooltip = false;
+				this.currentHoveredComment = null;
+				this.hoveredStar = null;
+                
+                // Complete state reset
+				this.scene.rotation.set(0, 0, 0);
+				this.controlsEnabled = false;
+				this.mouseDown = false;
+				this.rotationX = 0;
+				this.rotationY = 0;
+				this.autoRotate = true;
+				this.isHoveringCanvas = false;
+				this.isHoveringTooltip = false;
+				this.isHoveringButton = false;
+				this.currentHoveredComment = null;
+				this.hoveredStar = null;
+				this.zoomLevel = 1.0;
+				this.clearTooltipTimeouts();
+                
+                // Complete cleanup
                 this.starSystems.forEach(starGroup => {
                     this.scene.remove(starGroup);
-                    // Dispose geometries and materials
                     starGroup.children.forEach(child => {
                         if (child.geometry) child.geometry.dispose();
                         if (child.material) {
@@ -1519,7 +2289,6 @@
                     this.backgroundStars = null;
                 }
                 
-                // Clear the scene completely
                 while(this.scene.children.length > 0) {
                     this.scene.remove(this.scene.children[0]);
                 }
@@ -1527,6 +2296,9 @@
                 if (this.renderer) {
                     this.renderer.dispose();
                 }
+				
+				// Force cursor reset
+				this.setCursor('default');
             }
         }
 
@@ -1692,7 +2464,7 @@
                 starMapHologram.dispose();
                 starMapHologram = null;
                 
-                // Clear the canvas completely
+                // Clear the canvas
                 const canvas = document.getElementById('hologram-canvas');
                 if (canvas) {
                     const context = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
@@ -1701,7 +2473,7 @@
                     }
                 }
                 
-                // Reset all visual elements
+                // Reset visual elements
                 const orb = document.getElementById('orb');
                 const flashOverlay = document.getElementById('flash-overlay');
                 orb.classList.remove('glowing');
@@ -1718,14 +2490,26 @@
             
             container.classList.add('active');
             
-            // Small delay to ensure container is visible before creating hologram
-            setTimeout(() => {
-                starMapHologram = new StarMapHologram(extractedData);
-                starMapHologram.startHologramSequence();
-                
-                // Start background music automatically (original behavior)
-                startGalaxyAudio();
-            }, 100);
+            // Reset tooltip completely before creating new hologram
+			const tooltip = document.getElementById('star-tooltip');
+			if (tooltip) {
+				tooltip.classList.remove('visible', 'interactive');
+				tooltip.style.display = 'none';
+				// Remove any lingering save buttons
+				const saveButtons = tooltip.querySelectorAll('.tooltip-save-button');
+				saveButtons.forEach(button => button.remove());
+				// Force reset
+				setTimeout(() => {
+					tooltip.style.display = 'block';
+				}, 50);
+			}
+
+			// Create new hologram with delay
+			setTimeout(() => {
+				starMapHologram = new StarMapHologram(extractedData);
+				starMapHologram.startHologramSequence();
+				startGalaxyAudio();
+			}, 150);
         }
 
         function startGalaxyAudio() {
@@ -1733,13 +2517,11 @@
             
             if (!galaxyAudio) {
                 galaxyAudio = document.getElementById('galaxy-audio');
-                console.log('Galaxy audio element found:', !!galaxyAudio);
             }
             
             if (galaxyAudio) {
-                galaxyAudio.volume = 0.3; // Set to 30% volume
+                galaxyAudio.volume = 0.3;
                 
-                // Try to play immediately with better promise handling
                 const playPromise = galaxyAudio.play();
                 
                 if (playPromise !== undefined) {
@@ -1748,17 +2530,13 @@
                         isAudioMuted = false;
                         updateAudioButtonStates(false);
                     }).catch(error => {
-                        console.log('Audio autoplay blocked by browser. User must click to start.', error);
-                        // Set visual state to show audio is ready but muted
+                        console.log('Audio autoplay blocked by browser.', error);
                         isAudioMuted = true;
                         updateAudioButtonStates(true);
                     });
                 } else {
-                    console.log('Play promise is undefined');
                     updateAudioButtonStates(true);
                 }
-            } else {
-                console.log('Galaxy audio element not found');
             }
         }
         
@@ -1799,9 +2577,6 @@
         }
 
         function toggleAudio() {
-            const audioButton = document.getElementById('audio-toggle');
-            const audioButtonInfo = document.getElementById('audio-toggle-info');
-            
             if (!galaxyAudio) {
                 galaxyAudio = document.getElementById('galaxy-audio');
             }
@@ -1829,6 +2604,7 @@
             }
         }
 
+        // FIXED: Simplified closeStarMap function without problematic tooltip manipulation
         function closeStarMap() {
             const container = document.getElementById('star-map-container');
             const orb = document.getElementById('orb');
@@ -1840,16 +2616,14 @@
             flashOverlay.classList.remove('active');
             loadingOverlay.classList.remove('active');
             
-            // Stop background music
             stopGalaxyAudio();
             
-            // Properly dispose of the current hologram
             if (starMapHologram) {
                 starMapHologram.dispose();
                 starMapHologram = null;
             }
             
-            // Clear any existing canvas content
+            // Clear canvas
             const canvas = document.getElementById('hologram-canvas');
             if (canvas) {
                 const context = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
