@@ -316,6 +316,17 @@ app.get('/api/user-info', async (req, res) => {
     }
 });
 
+// Force canonical domain
+if (process.env.NODE_ENV === 'production') {
+    app.use((req, res, next) => {
+        // Redirect to canonical domain
+        if (req.hostname === 'www.astrogoblincommentviewer.com') {
+            return res.redirect(301, `https://astrogoblincommentviewer.com${req.url}`);
+        }
+        next();
+    });
+}
+
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({ 
