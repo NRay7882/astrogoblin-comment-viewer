@@ -98,10 +98,16 @@ app.post('/api/extract-post', async (req, res) => {
     try {
         console.log('Extracting data from:', postUrl);
         
-        // Extract post ID from URL
-        const postIdMatch = postUrl.match(/posts\/.*-(\d+)$/);
+        // Extract post ID from URL - handle both formats:
+        // https://www.patreon.com/posts/title-name-123456
+        // https://www.patreon.com/posts/123456
+        let postIdMatch = postUrl.match(/posts\/.*-(\d+)$/);
         if (!postIdMatch) {
-            return res.status(400).json({ error: 'Could not extract post ID from URL' });
+            // Try the simpler format without title
+            postIdMatch = postUrl.match(/posts\/(\d+)$/);
+        }
+        if (!postIdMatch) {
+            return res.status(400).json({ error: 'Could not extract post ID from URL. Please use a valid Patreon post URL.' });
         }
         
         const postId = postIdMatch[1];

@@ -99,19 +99,19 @@
         }
         
         .room-environment {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)),
-                url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAeACgDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAMBAgQF/8QAIhAAAgIBBAIDAAAAAAAAAAAAAgEDAAQRBRIhMQYTQVH/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A9VoooqGFFFFQooooqFFFFQooooqFFFFQooooqFFFFQooooqFFFFQooooqFFFFQv/2Q==');
-            background-size: cover;
-            background-position: center;
-            background-blend-mode: multiply;
-            z-index: 1;
-        }
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: 
+				linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)),
+				url('jediroom.jpg');
+			background-size: cover;
+			background-position: center;
+			background-blend-mode: multiply;
+			z-index: 1;
+		}
         
         .room-environment::before {
             content: '';
@@ -139,46 +139,97 @@
         }
         
         .podium {
-            position: absolute;
-            bottom: 10%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 150px;
-            height: 60px;
-            background: linear-gradient(to top, #1a1a2e, #2c2c54);
-            border-radius: 75px 75px 15px 15px;
-            z-index: 10;
-            box-shadow: 
-                0 0 30px rgba(0, 0, 0, 0.8),
-                inset 0 2px 10px rgba(255, 255, 255, 0.1);
-            border: 1px solid #333;
-        }
-        
-        .podium::before {
-            content: '';
-            position: absolute;
-            top: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 10px;
-            background: linear-gradient(to right, transparent, #333, transparent);
-            border-radius: 50%;
-        }
-        
-        .orb {
-            position: absolute;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 25px;
-            height: 25px;
-            background: radial-gradient(circle at 30% 30%, #87ceeb, #4682b4, #191970);
-            border-radius: 50%;
-            box-shadow: 0 0 15px rgba(70, 130, 180, 0.6);
-            z-index: 11;
-            opacity: 0.7;
-        }
+			position: absolute;
+			bottom: 10%;
+			left: 50%;
+			transform: translateX(-50%);
+			width: 200px;
+			height: 80px;
+			background-image: url('projector.png');
+			background-size: contain;
+			background-repeat: no-repeat;
+			background-position: center;
+			z-index: 10;
+			filter: brightness(0.8) contrast(1.2);
+		}
+
+		.podium::before,
+		.podium::after {
+			display: none;
+		}
+
+		.podium::before {
+			content: '';
+			position: absolute;
+			top: 12px;
+			left: 12px;
+			right: 12px;
+			bottom: 12px;
+			background: 
+				linear-gradient(45deg, transparent 30%, rgba(70, 130, 180, 0.15) 50%, transparent 70%),
+				radial-gradient(circle at 30% 30%, rgba(135, 206, 235, 0.25) 0%, transparent 60%);
+			border-radius: 75px 75px 8px 8px;
+			border: 1px solid rgba(70, 130, 180, 0.4);
+		}
+
+		.podium::after {
+			content: '';
+			position: absolute;
+			top: -8px;
+			left: 50%;
+			transform: translateX(-50%);
+			width: 110px;
+			height: 16px;
+			background: 
+				linear-gradient(to right, transparent, rgba(70, 130, 180, 0.5), transparent),
+				radial-gradient(ellipse, rgba(135, 206, 235, 0.4) 0%, transparent 70%);
+			border-radius: 55px;
+			filter: blur(1px);
+		}
+
+		.orb {
+			position: absolute;
+			top: -32px;
+			left: 50%;
+			transform: translateX(-50%);
+			width: 36px;
+			height: 36px;
+			background: 
+				radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.9) 0%, rgba(135, 206, 235, 0.95) 25%, rgba(70, 130, 180, 1) 55%, rgba(25, 25, 112, 1) 100%);
+			border-radius: 50%;
+			box-shadow: 
+				0 0 30px rgba(70, 130, 180, 0.9),
+				inset 0 3px 10px rgba(255, 255, 255, 0.4),
+				inset 0 -3px 8px rgba(0, 0, 0, 0.4);
+			z-index: 11;
+			opacity: 0.85;
+			border: 2px solid rgba(70, 130, 180, 0.7);
+			position: relative;
+		}
+
+		.orb::before {
+			content: '';
+			position: absolute;
+			top: 6px;
+			left: 8px;
+			width: 10px;
+			height: 6px;
+			background: rgba(255, 255, 255, 0.7);
+			border-radius: 50%;
+			filter: blur(0.5px);
+		}
+
+		.orb::after {
+			content: '';
+			position: absolute;
+			top: -6px;
+			left: -6px;
+			right: -6px;
+			bottom: -6px;
+			border: 1px solid rgba(70, 130, 180, 0.4);
+			border-radius: 50%;
+			animation: orb-ring-pulse 3s ease-in-out infinite;
+		}
         
         .orb.glowing {
             animation: orb-activation 3s ease-in-out forwards;
@@ -211,7 +262,61 @@
                 opacity: 0.9;
             }
         }
-        
+
+		@keyframes orb-ring-pulse {
+			0%, 100% {
+				opacity: 0.3;
+				transform: scale(1);
+			}
+			50% {
+				opacity: 0.8;
+				transform: scale(1.1);
+			}
+		}
+		
+		.projector-beam {
+			position: absolute;
+			top: -40px;
+			left: 50%;
+			transform: translateX(-50%);
+			width: 60px;
+			height: 80px;
+			background: 
+				radial-gradient(ellipse at center bottom, rgba(135, 206, 235, 0.8) 0%, rgba(70, 130, 180, 0.4) 30%, transparent 70%),
+				linear-gradient(to top, rgba(135, 206, 235, 0.6) 0%, rgba(70, 130, 180, 0.3) 50%, transparent 100%);
+			border-radius: 50%;
+			z-index: 9;
+			opacity: 0.7;
+			filter: blur(2px);
+			animation: beam-pulse 3s ease-in-out infinite;
+		}
+
+		@keyframes beam-pulse {
+			0%, 100% {
+				opacity: 0.5;
+				transform: translateX(-50%) scale(1);
+			}
+			50% {
+				opacity: 0.8;
+				transform: translateX(-50%) scale(1.1);
+			}
+		}
+		
+		@keyframes beam-activation {
+			0% { 
+				opacity: 0;
+				transform: translateX(-50%) scale(0.5);
+			}
+			50% { 
+				opacity: 1;
+				transform: translateX(-50%) scale(1.3);
+			}
+			100% { 
+				opacity: 0.7;
+				transform: translateX(-50%) scale(1);
+			}
+		}
+
         #hologram-canvas {
             position: absolute;
             top: 0;
@@ -691,18 +796,15 @@
 				<h4>Star Legend:</h4>
 				<ul>
 					<li>Comment stars with more likes appear larger</li>
-					<li><span style="color: #E6F3FF;">●</span> Shorter comments appear white-blue</li>
-					<li><span style="color: #FFFF96;">●</span> They turn yellow & orange the longer they are</li>
-					<li><span style="color: #FF6644;">●</span> Longer comments appear red</li>
-					<li><span style="color: #808080;">●</span> Read stars turn gray & shrink in size</li>
+					<li><span style="color: #E6F3FF;">●</span> All comment stars appear in white</li>
+					<li><span style="color: #808080;">●</span> Read comment stars turn gray & shrink in size</li>
 					<li><span style="color: #FFD700;">●</span> Saved stars turn golden & stay highlighted</li>
 				</ul>
 
 				<h4>Interaction Tips:</h4>
 				<ul style="list-style-type: none; padding-left: 0;">
-					<li>Use Save Comment to highlight important stars</li>
-					<li>Saved stars remain golden until unsaved</li>
-					<li>Save settings are not preserved between sessions</li>
+					<li>Save Comment highlights the star</li>
+					<li>Saved comments aren't preserved from previous sessions</li>
 				</ul>
 			</div>
 		</div>
@@ -711,8 +813,8 @@
         <button class="close-star-map" onclick="closeStarMap()">Close Galaxy</button>
         
         <div class="podium">
-            <div class="orb" id="orb"></div>
-        </div>
+			<div class="projector-beam"></div>
+		</div>
         <canvas id="hologram-canvas"></canvas>
         
         <!-- Loading Overlay -->
@@ -1122,98 +1224,36 @@
 			}
 
             createStarMapFromComments() {
-				const comments = this.commentData.comments.filter(c => c.id !== 'no_comments');
-				console.log('Creating stars for', comments.length, 'comments');
-				
-				if (comments.length === 0) {
-					this.createSingleStar();
-					return;
-				}
-				
-				comments.forEach((comment, index) => {
-					const likes = comment.likes || 0;
-					const contentLength = comment.content ? comment.content.length : 0;
-					
-					// TEMPORARY FIX: Force completely consistent sizing based ONLY on likes
-					let starSize;
-					if (likes === 0) {
-						starSize = 0.5; // Force exact same size for all 0-like comments
-					} else if (likes === 1) {
-						starSize = 0.6; // Force exact same size for all 1-like comments
-					} else {
-						// Only for higher likes, use normal calculation
-						const baseSize = 0.5;
-						const maxMultiplier = 3.0;
-						const maxLikesForSize = 20;
-						const sizeMultiplier = 1 + Math.min(likes / maxLikesForSize, 1) * (maxMultiplier - 1);
-						starSize = baseSize * sizeMultiplier;
-					}
+                const comments = this.commentData.comments.filter(c => c.id !== 'no_comments');
+                console.log('Creating stars for', comments.length, 'comments');
 
-					// Size fix applied - all stars with same like count now have identical sizes
-										
-					// COLOR based on character count
-					let starColor;
-					if (contentLength <= 25) {
-						starColor = 0xE6F3FF;
-					} else if (contentLength <= 50) {
-						const progress = (contentLength - 25) / 25;
-						const r = Math.floor(230 + (progress * 25));
-						const g = Math.floor(243 + (progress * 12));
-						const b = 255;
-						starColor = (r << 16) | (g << 8) | b;
-					} else if (contentLength <= 75) {
-						const progress = (contentLength - 50) / 25;
-						const r = 255;
-						const g = 255;
-						const b = Math.floor(255 - (progress * 30));
-						starColor = (r << 16) | (g << 8) | b;
-					} else if (contentLength <= 100) {
-						const progress = (contentLength - 75) / 25;
-						const r = 255;
-						const g = 255;
-						const b = Math.floor(225 - (progress * 75));
-						starColor = (r << 16) | (g << 8) | b;
-					} else if (contentLength <= 150) {
-						const progress = (contentLength - 100) / 50;
-						const r = 255;
-						const g = Math.floor(255 - (progress * 40));
-						const b = Math.floor(150 - (progress * 50));
-						starColor = (r << 16) | (g << 8) | b;
-					} else if (contentLength <= 200) {
-						const progress = (contentLength - 150) / 50;
-						const r = 255;
-						const g = Math.floor(215 - (progress * 50));
-						const b = Math.floor(100 - (progress * 100));
-						starColor = (r << 16) | (g << 8) | b;
-					} else if (contentLength <= 250) {
-						const progress = (contentLength - 200) / 50;
-						const r = 255;
-						const g = Math.floor(165 - (progress * 65));
-						const b = 0;
-						starColor = (r << 16) | (g << 8) | b;
-					} else {
-						const progress = Math.min((contentLength - 250) / 50, 1);
-						const r = 255;
-						const g = Math.floor(100 - (progress * 100));
-						const b = 0;
-						starColor = (r << 16) | (g << 8) | b;
-					}
-					
-					// Temporarily standardize intensity to see if this fixes the visual size issue
-					const intensity = 1.0; // Fixed intensity for all stars to test visual consistency
+                if (comments.length === 0) {
+                    this.createSingleStar();
+                    return;
+                }
 
-					// Debug: Log intensity for 0-1 like stars
-					if (likes <= 1) {
-						console.log(`Intensity debug: likes=${likes}, intensity=${intensity}, content="${comment.content?.substring(0, 20) || 'N/A'}"`);
-					}
+                const maxLikesForScaling = 20; // The number of likes at which a star reaches its max size multiplier
 
-					// Debug: Log intensity for 0-1 like stars
-					if (likes <= 1) {
-						console.log(`Intensity debug: likes=${likes}, intensity=${intensity}, content="${comment.content?.substring(0, 20) || 'N/A'}"`);
-					}
-					
-					// Positioning
-					const radiusMin = 2.5;
+                comments.forEach((comment, index) => {
+                    const likes = comment.likes || 0;
+                    const contentLength = comment.content ? comment.content.length : 0;
+
+                    // --- FIX 1: SIMPLIFIED AND CORRECTED STAR SIZE CALCULATION (based on LIKES) ---
+                    // Base size for every star is 1.0.
+                    // The multiplier increases with likes, up to a max of 3x for a highly-liked comment.
+                    const sizeMultiplier = 1 + Math.min(likes / maxLikesForScaling, 1) * 2.0; // Multiplier from 1.0 to 3.0
+                    const starSize = 0.4 * sizeMultiplier;
+
+                    // Star Wars style bluish-white color for all stars
+					const starColor = new THREE.Color(0xE6F3FF); // Bluish-white like holographic projections
+
+                    // --- FIX 3: DECOUPLE INTENSITY FROM SIZE ---
+                    // Intensity is now just for brightness, not for scaling.
+                    // We can set it to a consistent value or give it a slight, non-scaling variation.
+                    const intensity = 1.0; 
+
+                    // Positioning (Your logic here is good)
+                    const radiusMin = 2.5;
 					const radiusMax = 5.5;
 					const radius = radiusMin + Math.random() * (radiusMax - radiusMin);
 					
@@ -1229,28 +1269,30 @@
 					const x = radius * Math.cos(theta);
 					const y = Math.min(maxY, biasedY);
 					const z = radius * Math.sin(theta);
-					
-					const starGroup = this.createStarSystem({
-						size: starSize,
-						color: starColor,
-						intensity: intensity,
-						position: { x, y, z },
-						comment: comment,
-						delay: index * 0.2,
+
+                    console.log(`Star ${index}: likes=${likes}, contentLength=${contentLength}, finalSize=${starSize.toFixed(2)}`);
+
+                    const starGroup = this.createStarSystem({
+                        size: starSize, // Correctly passing the size from LIKES
+                        color: starColor,
+                        intensity: intensity,
+                        position: { x, y, z },
+                        comment: comment,
+                        delay: index * 0.05, // A slightly faster delay for a snappier feel
 						originalSize: starSize,
-						originalColor: starColor,
+						originalColor: starColor.getHex(),
 						isRead: false
-					});
-					
-					this.starSystems.push(starGroup);
-					this.scene.add(starGroup);
-				});
-			}
+                    });
+
+                    this.starSystems.push(starGroup);
+                    this.scene.add(starGroup);
+                });
+            }
 
             createSingleStar() {
                 const starGroup = this.createStarSystem({
                     size: 0.8,
-                    color: 0x87ceeb,
+                    color: 0xE6F3FF,
                     intensity: 1.0,
                     position: { x: 0, y: 0, z: 0 },
                     comment: { content: "No comments found", username: "System" },
@@ -1264,33 +1306,29 @@
             createStarSystem(config) {
 				const starGroup = new THREE.Group();
 				
-				// Geometry created with consistent sizing
-
-				const starGeometry = new THREE.SphereGeometry(config.size * 0.15, 8, 8);
+				// A single base geometry for the core star
+				const starGeometry = new THREE.SphereGeometry(0.1, 32, 32); 
 				const starMaterial = new THREE.MeshBasicMaterial({ 
 					color: config.color,
 					transparent: true,
-					opacity: 0
+					opacity: 0 // Start invisible for fade-in animation
 				});
 				
 				const star = new THREE.Mesh(starGeometry, starMaterial);
 				starGroup.add(star);
 				
-				const glowGeometry = new THREE.SphereGeometry(config.size * 0.45, 8, 8);
-
-				// Glow created with consistent sizing
-                const glowMaterial = new THREE.ShaderMaterial({
-                    uniforms: {
-                        time: { value: 0 },
-                        color: { value: new THREE.Color(config.color) },
-                        intensity: { value: config.intensity }
-                    },
+                // The glow effect geometry
+				const glowGeometry = new THREE.SphereGeometry(0.3, 32, 32); 
+				const glowMaterial = new THREE.ShaderMaterial({
+					uniforms: {
+						time: { value: 0 },
+						color: { value: new THREE.Color(config.color) },
+						intensity: { value: config.intensity } // Use intensity for shader effect
+					},
                     vertexShader: `
                         varying vec3 vNormal;
-                        varying vec3 vPosition;
                         void main() {
                             vNormal = normalize(normalMatrix * normal);
-                            vPosition = position;
                             gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
                         }
                     `,
@@ -1299,12 +1337,11 @@
                         uniform vec3 color;
                         uniform float intensity;
                         varying vec3 vNormal;
-                        varying vec3 vPosition;
                         
                         void main() {
-                            float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 2.0);
-                            float pulse = sin(time * 2.0 + length(vPosition) * 3.0) * 0.2 + 0.8;
-                            float alpha = fresnel * intensity * pulse * 0.6;
+                            float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 3.0);
+                            float pulse = sin(time * 2.0) * 0.15 + 0.85;
+                            float alpha = fresnel * intensity * pulse;
                             gl_FragColor = vec4(color, alpha);
                         }
                     `,
@@ -1317,12 +1354,16 @@
                 starGroup.add(glow);
                 
                 starGroup.position.set(config.position.x, config.position.y, config.position.z);
-                starGroup.scale.set(0, 0, 0);
-                starGroup.userData = { 
-                    originalScale: 1,
-                    config: config,
-                    delay: config.delay
-                };
+                
+                // --- FIX 4: SET INITIAL SCALE TO ZERO and USE 'size' FOR USERDATA ---
+                // The star should start at size 0 to be animated in.
+                // The `originalScale` userData property will be used by the animation loop.
+				starGroup.scale.set(0, 0, 0); 
+				starGroup.userData = { 
+					originalScale: config.size, // This is the crucial fix! Store the size from LIKES.
+					config: config,
+					delay: config.delay
+				};
                 
                 return starGroup;
             }
@@ -1879,31 +1920,30 @@
 						glowMesh.material.uniforms.color.value = new THREE.Color(0xFFD700);
 						glowMesh.material.uniforms.intensity.value = 2.0;
 					}
-					// Make bigger - multiply current scale by 1.5
-					const currentScale = starGroup.scale.x;
-					const newScale = currentScale * 1.5;
+					// Make bigger - use the original likes-based size * 1.5
+					const originalScale = starGroup.userData.originalScale;
+					const newScale = originalScale * 1.5;
 					starGroup.scale.set(newScale, newScale, newScale);
-					console.log('📏 Scale changed from', currentScale, 'to', newScale);
+					console.log('📏 Scale changed to saved size:', newScale);
 					// Add golden glow effect
 					this.addSavedStarGlow(starGroup);
 				} else {
 					console.log('🔄 Restoring original color and size:', comment.content.substring(0, 20));
 					if (starMesh?.material) {
-						const originalColor = starGroup.userData.config.originalColor;
 						const isRead = starGroup.userData.config.isRead;
-						starMesh.material.color.setHex(isRead ? 0x808080 : originalColor);
+						starMesh.material.color.setHex(isRead ? 0x808080 : 0xE6F3FF);
 					}
 					// Also restore the main glow color
 					const glowMesh = starGroup.children[1];
 					if (glowMesh?.material?.uniforms) {
 						const isRead = starGroup.userData.config.isRead;
-						const originalColor = starGroup.userData.config.originalColor;
-						glowMesh.material.uniforms.color.value = new THREE.Color(isRead ? 0x606060 : originalColor);
+						glowMesh.material.uniforms.color.value = new THREE.Color(isRead ? 0x606060 : 0xE6F3FF);
 						glowMesh.material.uniforms.intensity.value = isRead ? 0.2 : (starGroup.userData.config.intensity || 1.0);
 					}
-					// Reset to scale of 1.0 or smaller if it was read
+					// Reset to original likes-based scale or half if read
 					const isRead = starGroup.userData.config.isRead;
-					const targetScale = isRead ? 0.5 : 1.0;
+					const originalScale = starGroup.userData.originalScale;
+					const targetScale = isRead ? originalScale * 0.5 : originalScale;
 					starGroup.scale.set(targetScale, targetScale, targetScale);
 					console.log('📏 Scale reset to', targetScale);
 					// Remove golden glow effect
@@ -1915,7 +1955,7 @@
 			addSavedStarGlow(starGroup) {
 				this.removeSavedStarGlow(starGroup);
 				
-				const starSize = starGroup.userData.config.size || 0.5;
+				const starSize = starGroup.userData.config.size || 0.4;
 				const glowGeometry = new THREE.SphereGeometry(starSize * 0.45, 16, 16);
 				
 				const glowMaterial = new THREE.ShaderMaterial({
@@ -1988,22 +2028,23 @@
 				if (starMesh && starMesh.material && !isSaved) {
 					starMesh.material.color.setHex(0x808080);
 				}
-				
+
 				// Don't dim glow for saved stars
 				if (glowMesh && glowMesh.material && !isSaved) {
 					if (glowMesh.material.uniforms && glowMesh.material.uniforms.intensity) {
 						glowMesh.material.uniforms.intensity.value = 0.2;
 					}
 					if (glowMesh.material.uniforms && glowMesh.material.uniforms.color) {
-						glowMesh.material.uniforms.color.value.setHex(0x606060);
+						glowMesh.material.uniforms.color.value = new THREE.Color(0x606060);
 					}
 				}
 				
 				// Don't shrink saved stars, only read ones
 				if (!isSaved) {
-					const baseSize = 0.5;
 					const currentScale = starGroup.scale.x;
-					const targetScale = (baseSize / starGroup.userData.originalScale) * currentScale;
+					// Calculate target scale as 50% of the original likes-based scale
+					const originalScale = starGroup.userData.originalScale;
+					const targetScale = originalScale * 0.5;
 					
 					const startScale = currentScale;
 					const startTime = Date.now();
@@ -2030,13 +2071,15 @@
                 this.showLoadingOverlay();
                 this.updateLoadingProgress(10, "Initializing holographic projector...");
                 
-                const orb = document.getElementById('orb');
                 const flashOverlay = document.getElementById('flash-overlay');
-                
-                setTimeout(() => {
-                    this.updateLoadingProgress(25, "Powering up projection orb...");
-                    orb.classList.add('glowing');
-                }, 500);
+
+				setTimeout(() => {
+					this.updateLoadingProgress(25, "Powering up holographic projector...");
+					const projectorBeam = document.querySelector('.projector-beam');
+					if (projectorBeam) {
+						projectorBeam.style.animation = 'beam-activation 3s ease-in-out forwards, beam-pulse 3s ease-in-out infinite';
+					}
+				}, 500);
                 
                 setTimeout(() => {
                     this.updateLoadingProgress(40, "Calibrating stellar coordinates...");
@@ -2074,23 +2117,13 @@
 								const scale = Math.min(adjustedProgress, 1);
 								const commentId = starGroup.userData.config?.comment?.id || starGroup.userData.config?.comment?.username;
 								const isSaved = this.savedStars.has(commentId);
-								const finalScale = isSaved ? scale * 1.5 : scale;
+								let finalScale = scale * starGroup.userData.originalScale;
 								
-								// FORCE CONSISTENT SCALING: Ensure identical scales for same like counts
-								const likes = starGroup.userData.config?.comment?.likes || 0;
-								let forcedScale = finalScale;
-								if (likes === 0 && !isSaved) {
-									forcedScale = scale; // Ensure all 0-like stars have identical scale
-								} else if (likes === 1 && !isSaved) {
-									forcedScale = scale; // Ensure all 1-like stars have identical scale
+								if (isSaved) {
+									finalScale = scale * starGroup.userData.originalScale * 1.5;
 								}
 								
-								// Debug: Log scaling during animation
-								if (Math.abs(forcedScale - 1.0) < 0.01) { // When animation is nearly complete
-									console.log(`FORCED Animation scaling: content="${starGroup.userData.config?.comment?.content?.substring(0, 30) || 'N/A'}", originalSize=${starGroup.userData.config?.size}, forcedScale=${forcedScale}, likes=${likes}`);
-								}
-								
-								starGroup.scale.set(forcedScale, forcedScale, forcedScale);
+								starGroup.scale.set(finalScale, finalScale, finalScale);
 								
 								starGroup.children.forEach(child => {
 									if (child.material) {
@@ -2330,6 +2363,7 @@
         }
 
         function connectPatreon() {
+            console.log('connectPatreon function called!'); // Debug line
             showStatus('Redirecting to Patreon...', 'loading');
             window.location.href = '/auth/patreon';
         }
@@ -2474,10 +2508,8 @@
                 }
                 
                 // Reset visual elements
-                const orb = document.getElementById('orb');
-                const flashOverlay = document.getElementById('flash-overlay');
-                orb.classList.remove('glowing');
-                flashOverlay.classList.remove('active');
+				const flashOverlay = document.getElementById('flash-overlay');
+				flashOverlay.classList.remove('active');
             }
             
             document.getElementById('post-title').textContent = extractedData.post.title;
@@ -2606,48 +2638,78 @@
 
         // FIXED: Simplified closeStarMap function without problematic tooltip manipulation
         function closeStarMap() {
-            const container = document.getElementById('star-map-container');
-            const orb = document.getElementById('orb');
-            const flashOverlay = document.getElementById('flash-overlay');
-            const loadingOverlay = document.getElementById('loading-overlay');
-            
-            container.classList.remove('active');
-            orb.classList.remove('glowing');
-            flashOverlay.classList.remove('active');
-            loadingOverlay.classList.remove('active');
-            
-            stopGalaxyAudio();
-            
-            if (starMapHologram) {
-                starMapHologram.dispose();
-                starMapHologram = null;
-            }
-            
-            // Clear canvas
-            const canvas = document.getElementById('hologram-canvas');
-            if (canvas) {
-                const context = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-                if (context) {
-                    context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
-                }
-            }
-        }
+			const container = document.getElementById('star-map-container');
+			const flashOverlay = document.getElementById('flash-overlay');
+			const loadingOverlay = document.getElementById('loading-overlay');
+			const projectorBeam = document.querySelector('.projector-beam');
+			
+			container.classList.remove('active');
+			flashOverlay.classList.remove('active');
+			loadingOverlay.classList.remove('active');
+			
+			// Reset projector beam animation
+			if (projectorBeam) {
+				projectorBeam.style.animation = 'beam-pulse 3s ease-in-out infinite';
+			}
+			
+			stopGalaxyAudio();
+			
+			if (starMapHologram) {
+				starMapHologram.dispose();
+				starMapHologram = null;
+			}
+			
+			// Clear canvas
+			const canvas = document.getElementById('hologram-canvas');
+			if (canvas) {
+				const context = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+				if (context) {
+					context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
+				}
+			}
+		}
 
         function exportData() {
-            if (!extractedData) return;
+			if (!extractedData) return;
 
-            const dataStr = JSON.stringify(extractedData, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(dataBlob);
+			// Create filename based on post title
+			let filename = 'patreon_comments';
+			
+			if (extractedData.post && extractedData.post.title) {
+				// Get the post title and clean it up
+				let postTitle = extractedData.post.title
+					.trim()                          // Remove leading/trailing whitespace
+					.replace(/[^\w\s-]/g, '')        // Remove special characters except letters, numbers, spaces, and hyphens
+					.replace(/\s+/g, '_')            // Replace spaces with underscores
+					.replace(/_+/g, '_')             // Replace multiple underscores with single underscore
+					.replace(/^_|_$/g, '');          // Remove leading/trailing underscores
+				
+				// If we successfully cleaned the title, use it
+				if (postTitle) {
+					filename = postTitle;
+				}
+			}
+			
+			// Add date in YYYYMMDD format
+			const today = new Date();
+			const dateStr = today.getFullYear() + 
+						   String(today.getMonth() + 1).padStart(2, '0') + 
+						   String(today.getDate()).padStart(2, '0');
+			
+			const finalFilename = `${filename}_${dateStr}.json`;
 
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `patreon_comments_${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
+			const dataStr = JSON.stringify(extractedData, null, 2);
+			const dataBlob = new Blob([dataStr], { type: 'application/json' });
+			const url = URL.createObjectURL(dataBlob);
 
-            URL.revokeObjectURL(url);
-            showStatus('✅ Data exported!', 'success');
-        }
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = finalFilename;
+			link.click();
+
+			URL.revokeObjectURL(url);
+			showStatus('✅ Data exported!', 'success');
+		}
 
         function showStatus(message, type) {
             const status = document.getElementById('status');
