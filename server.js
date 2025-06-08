@@ -9,13 +9,13 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// ⚙️ Configuration from environment variables with fallbacks
+// Environment variables
 const CLIENT_ID = process.env.PATREON_CLIENT_ID || process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.PATREON_CLIENT_SECRET || process.env.CLIENT_SECRET;
 const REDIRECT_URI = process.env.PATREON_REDIRECT_URI || process.env.REDIRECT_URI || 'http://localhost:3000/oauth/callback';
 const PORT = process.env.PORT || 3000;
 
-// Validate required environment variables
+// Validate required variables
 if (!CLIENT_ID) {
     console.error('❌ Missing PATREON_CLIENT_ID environment variable');
     console.error('Set it with: export PATREON_CLIENT_ID=your_client_id');
@@ -36,7 +36,7 @@ console.log(`   PORT: ${PORT}`);
 
 const patreonOAuth = patreon.oauth;
 
-let userTokens = {}; // In production, use proper session management
+let userTokens = {};
 
 // Serve the main page
 app.get('/', (req, res) => {
@@ -76,7 +76,7 @@ app.get('/oauth/callback', async (req, res) => {
             refresh_token: tokens.refresh_token ? '✓ Present' : '✗ Missing'
         });
 
-        // Store tokens (in production, use proper session management)
+        // Store tokens
         userTokens.access_token = tokens.access_token;
         userTokens.refresh_token = tokens.refresh_token;
         
@@ -98,12 +98,11 @@ app.post('/api/extract-post', async (req, res) => {
     try {
         console.log('Extracting data from:', postUrl);
         
-        // Extract post ID from URL - handle both formats:
+        // Extract post ID from URL - handles both formats:
         // https://www.patreon.com/posts/title-name-123456
         // https://www.patreon.com/posts/123456
         let postIdMatch = postUrl.match(/posts\/.*-(\d+)$/);
         if (!postIdMatch) {
-            // Try the simpler format without title
             postIdMatch = postUrl.match(/posts\/(\d+)$/);
         }
         if (!postIdMatch) {
@@ -143,7 +142,7 @@ app.post('/api/extract-post', async (req, res) => {
         const postData = await postResponse.json();
         console.log('Post data received');
         
-        // Try different comment endpoints
+        // Get comment endpoints
         let commentsData = null;
         const commentEndpoints = [
             `https://www.patreon.com/api/oauth2/v2/posts/${postId}/comments`,
@@ -235,7 +234,7 @@ app.post('/api/extract-post', async (req, res) => {
             };
         }
 
-        // Process comments if we found any
+        // Process comments if found
         if (commentsData && commentsData.data) {
             console.log('Processing comments data...');
             console.log('Total comments in API response:', commentsData.data.length);
@@ -247,7 +246,7 @@ app.post('/api/extract-post', async (req, res) => {
             
             result.totalComments = result.comments.length;
             
-            // Try to get post like count from included data
+            // Get post like count from included data
             if (commentsData.included) {
                 const postFromIncluded = commentsData.included.find(item => item.type === 'post' && item.id === postId);
                 if (postFromIncluded && postFromIncluded.attributes) {
@@ -281,7 +280,7 @@ app.post('/api/extract-post', async (req, res) => {
         console.error('Error message being sent to frontend:', error.message);
         
         res.status(500).json({ 
-            error: error.message, // Send the actual error message, not generic text
+            error: error.message,
             details: error.message,
             postUrl: req.body.postUrl
         });

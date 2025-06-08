@@ -342,7 +342,7 @@
         }
         
         .hologram-grid {
-            display: none; /* Remove the crosshair grid */
+            display: none;
         }
         
         @keyframes projection-pulse {
@@ -440,7 +440,7 @@
 		}
 
 		.galaxy-tips h4:not(:first-child) {
-			margin-top: 12px; /* Add spacing between sections */
+			margin-top: 12px;
 		}
 
 		.galaxy-tips ul {
@@ -481,7 +481,7 @@
 			margin-left: 0; /* Align with other items */
 		}
 
-		/* Force proper spacing for colored dot spans - more specific selector */
+		/* Force proper spacing for galaxy tips */
 		.galaxy-tips h4:nth-of-type(2) + ul li:nth-child(n+2) span {
 			font-size: 16px;
 			text-shadow: 0 0 3px currentColor;
@@ -491,7 +491,7 @@
 			flex-shrink: 0;
 			position: relative;
 			left: 0px;
-			display: inline-block; /* Ensure consistent spacing */
+			display: inline-block;
 		}
 
 		.galaxy-tips ul:last-child li span {
@@ -508,8 +508,8 @@
 		/* Remove sparkles from Star Legend items with colored dots (items 2-6) */
 		.galaxy-tips h4:nth-of-type(2) + ul li:nth-child(n+2):before {
 			content: "";
-			margin-right: 0; /* Remove margin since there's no sparkle */
-			width: 0; /* Remove width since there's no sparkle */
+			margin-right: 0;
+			width: 0;
 		}
         
         .loading-overlay {
@@ -610,7 +610,7 @@
         }
         
         .audio-prompt {
-            display: none !important; /* Hide the popup completely */
+            display: none !important;
         }
         
 		.star-map-tooltip {
@@ -623,7 +623,7 @@
 			min-width: 200px;
 			max-width: 450px;
 			width: auto;
-			z-index: 100; /* MUCH higher z-index */
+			z-index: 100;
 			pointer-events: none; /* Start with no pointer events */
 			opacity: 0;
 			transition: opacity 0.2s ease;
@@ -972,13 +972,13 @@
                 console.log('StarMapHologram: Scene initialized');
             }
             
-            // Complete rewrite of controls with proper cursor management
+            // Controls with cursor management
 			setupControls() {
 				console.log('StarMapHologram: Setting up controls');
 				
 				this.canvas = document.getElementById('hologram-canvas');
 				
-				// Mouse move handler with proper hover detection
+				// Mouse move handler with hover detection
 				this.canvas.addEventListener('mousemove', (e) => {
 					if (!this.controlsEnabled) return;
 					
@@ -1187,7 +1187,7 @@
 						this.autoRotate = false;
 						this.showTooltipWithDelay(comment, intersects[0].point);
 					} else if (comment && comment === this.currentHoveredComment) {
-						// Still hovering the same star - ensure read timer is running if tooltip is visible
+						// If still hovering on the same star - ensure read timer is running if tooltip is visible
 						const tooltip = document.getElementById('star-tooltip');
 						const tooltipVisible = tooltip && tooltip.classList.contains('visible');
 						if (tooltipVisible && !this.readTimer && !starGroup.userData.config.isRead) {
@@ -1238,21 +1238,19 @@
                     const likes = comment.likes || 0;
                     const contentLength = comment.content ? comment.content.length : 0;
 
-                    // --- FIX 1: SIMPLIFIED AND CORRECTED STAR SIZE CALCULATION (based on LIKES) ---
                     // Base size for every star is 1.0.
                     // The multiplier increases with likes, up to a max of 3x for a highly-liked comment.
-                    const sizeMultiplier = 1 + Math.min(likes / maxLikesForScaling, 1) * 2.0; // Multiplier from 1.0 to 3.0
+                    const sizeMultiplier = 1 + Math.min(likes / maxLikesForScaling, 1) * 2.0;
                     const starSize = 0.4 * sizeMultiplier;
 
-                    // Star Wars style bluish-white color for all stars
-					const starColor = new THREE.Color(0xE6F3FF); // Bluish-white like holographic projections
+                    // Bluish-white color for all stars
+					const starColor = new THREE.Color(0xE6F3FF);
 
-                    // --- FIX 3: DECOUPLE INTENSITY FROM SIZE ---
-                    // Intensity is now just for brightness, not for scaling.
-                    // We can set it to a consistent value or give it a slight, non-scaling variation.
+                    // Intensity for brightness, not scaling
+                    // Use a consistent value or give it a non-scaling variation.
                     const intensity = 1.0; 
 
-                    // Positioning (Your logic here is good)
+                    // Positioning
                     const radiusMin = 2.5;
 					const radiusMax = 5.5;
 					const radius = radiusMin + Math.random() * (radiusMax - radiusMin);
@@ -1273,12 +1271,12 @@
                     console.log(`Star ${index}: likes=${likes}, contentLength=${contentLength}, finalSize=${starSize.toFixed(2)}`);
 
                     const starGroup = this.createStarSystem({
-                        size: starSize, // Correctly passing the size from LIKES
+                        size: starSize,
                         color: starColor,
                         intensity: intensity,
                         position: { x, y, z },
                         comment: comment,
-                        delay: index * 0.05, // A slightly faster delay for a snappier feel
+                        delay: index * 0.05,
 						originalSize: starSize,
 						originalColor: starColor.getHex(),
 						isRead: false
@@ -1306,18 +1304,18 @@
             createStarSystem(config) {
 				const starGroup = new THREE.Group();
 				
-				// A single base geometry for the core star
+				// Base geometry for the core star
 				const starGeometry = new THREE.SphereGeometry(0.1, 32, 32); 
 				const starMaterial = new THREE.MeshBasicMaterial({ 
 					color: config.color,
 					transparent: true,
-					opacity: 0 // Start invisible for fade-in animation
+					opacity: 0
 				});
 				
 				const star = new THREE.Mesh(starGeometry, starMaterial);
 				starGroup.add(star);
 				
-                // The glow effect geometry
+                // Glow effect geometry
 				const glowGeometry = new THREE.SphereGeometry(0.3, 32, 32); 
 				const glowMaterial = new THREE.ShaderMaterial({
 					uniforms: {
@@ -1355,12 +1353,10 @@
                 
                 starGroup.position.set(config.position.x, config.position.y, config.position.z);
                 
-                // --- FIX 4: SET INITIAL SCALE TO ZERO and USE 'size' FOR USERDATA ---
-                // The star should start at size 0 to be animated in.
-                // The `originalScale` userData property will be used by the animation loop.
+                // The star should start at size 0
 				starGroup.scale.set(0, 0, 0); 
 				starGroup.userData = { 
-					originalScale: config.size, // This is the crucial fix! Store the size from LIKES.
+					originalScale: config.size,
 					config: config,
 					delay: config.delay
 				};
@@ -1563,7 +1559,7 @@
                 this.scene.add(line);
             }
             
-            // Simplified tooltip with proper interaction
+            // Interactive tooltip
 			showTooltip(comment, worldPosition) {
 				const screenPosition = worldPosition.clone().project(this.camera);
 				const canvas = document.getElementById('hologram-canvas');
@@ -1606,7 +1602,7 @@
 				saveButton.textContent = isSaved ? '⭐ Unsave Comment' : '💾 Save Comment';
 				saveButton.className = `tooltip-save-button ${isSaved ? 'saved' : ''}`;
 				
-				// Proper button event handling with cloning to prevent multiple listeners
+				// Button event handling with cloning prevents multiple listeners
 				const newSaveButton = saveButton.cloneNode(true);
 				saveButton.parentNode.replaceChild(newSaveButton, saveButton);
 
@@ -1673,9 +1669,9 @@
 				this.startReadTimer(comment);
 			}
 			
-			// Proper tooltip interaction with delayed hide/show
+			// Tooltip interaction with delayed hide/show
 			setupTooltipInteraction() {
-				// Ensure we have fresh tooltip reference
+				// Ensure a fresh tooltip reference
 				this.tooltip = document.getElementById('star-tooltip');
 				if (this.boundTooltipEnter) {
 					this.tooltip.removeEventListener('mouseenter', this.boundTooltipEnter);
@@ -1706,7 +1702,7 @@
 					this.isHoveringTooltip = false;
 					this.hideTooltipWithDelay();
 					
-					// Clear hoveredStar since we're no longer interacting with star or tooltip
+					// Clear hoveredStar
 					if (!this.currentHoveredComment) {
 						this.hoveredStar = null;
 					}
@@ -1753,7 +1749,7 @@
 
 			// Hide tooltip with delay
 			hideTooltipWithDelay() {
-				// Clear show/hide timeouts but NOT the read timer
+				// Clear timeouts but NOT the read timer
 				if (this.showTooltipTimeout) {
 					clearTimeout(this.showTooltipTimeout);
 					this.showTooltipTimeout = null;
@@ -1767,7 +1763,7 @@
 					if (!this.isHoveringTooltip) {
 						this.hideTooltip();
 					}
-				}, 200); // Longer delay for better UX
+				}, 200);
 			}
 
 			// Immediate tooltip hide (for mouse down, etc.)
@@ -1798,7 +1794,7 @@
 						this.setCursor('default');
 					}
 					
-					// Multiple recovery attempts for auto-rotation
+					// Recovery attempts for auto-rotation
 					const attemptRecovery = () => {
 						if (!this.isHoveringTooltip && !this.currentHoveredComment && !this.mouseDown) {
 							this.autoRotate = true;
@@ -1808,7 +1804,7 @@
 						return false;
 					};
 					
-					// Try recovery at multiple intervals
+					// Recovery at multiple intervals
 					setTimeout(attemptRecovery, 100);
 					setTimeout(attemptRecovery, 300);
 					setTimeout(attemptRecovery, 600);
@@ -1840,7 +1836,7 @@
 							this.hoveredStar.userData.config?.comment === comment;
 						const stillInteracting = tooltipVisible || this.isHoveringTooltip || stillHoveringThisStar;
 						
-						// Double-check it's still not saved before marking as read
+						// Check if star is still not saved before marking as read
 						const stillNotSaved = !this.savedStars.has(commentId);
 						
 						if (stillNotSaved && this.hoveredStar && !this.hoveredStar.userData.config.isRead && stillInteracting) {
@@ -1887,7 +1883,7 @@
 				}, 100);
 			}
 			
-			// Update star appearance based on saved state - DEBUG VERSION
+			// Update star appearance based on saved state
 			updateStarSavedAppearance(comment, isSaved) {
 				const commentId = comment.id || `${comment.username}_${comment.content}_${comment.createdAt}` || comment.username;
 				console.log('🔍 Looking for star with ID:', commentId);
@@ -1907,7 +1903,7 @@
 				
 				console.log('✅ Found star, current scale:', starGroup.scale.x, 'isSaved:', isSaved);
 				
-				// ADD COLOR AND SIZE CHANGE
+				// Change saved star size and color
 				const starMesh = starGroup.children[0];
 				if (isSaved) {
 					console.log('⭐ Making star golden and larger:', comment.content.substring(0, 20));
@@ -1920,7 +1916,7 @@
 						glowMesh.material.uniforms.color.value = new THREE.Color(0xFFD700);
 						glowMesh.material.uniforms.intensity.value = 2.0;
 					}
-					// Make bigger - use the original likes-based size * 1.5
+					// Increased glow scale
 					const originalScale = starGroup.userData.originalScale;
 					const newScale = originalScale * 1.5;
 					starGroup.scale.set(newScale, newScale, newScale);
@@ -2096,7 +2092,7 @@
                 }, 3000);
             }
             
-            // Proper animation loop with working auto-rotation
+            // Animation loop with auto-rotation
 			animateStarMap() {
 				this.isAnimating = true;
 				const startTime = Date.now();
@@ -2104,7 +2100,7 @@
 				const animate = () => {
 					const elapsed = (Date.now() - startTime) / 1000;
 					
-					// Phase 1: Burst expansion (0-4s)
+					// Star burst expansion (0-4s)
 					if (elapsed < 4) {
 						const progress = elapsed / 4;
 						const easeProgress = 1 - Math.pow(1 - progress, 3);
@@ -2144,7 +2140,7 @@
 						});
 					}
 					
-					// Phase 2: Interactive mode (4s+)
+					// Enable interactive mode (4s+)
 					else {
 						if (!this.controlsEnabled) {
 							this.controlsEnabled = true;
@@ -2363,7 +2359,7 @@
         }
 
         function connectPatreon() {
-            console.log('connectPatreon function called!'); // Debug line
+            console.log('connectPatreon function called!');
             showStatus('Redirecting to Patreon...', 'loading');
             window.location.href = '/auth/patreon';
         }
@@ -2492,7 +2488,7 @@
 
             const container = document.getElementById('star-map-container');
             
-            // Clear any existing hologram first
+            // Clear any existing holograms
             if (starMapHologram) {
                 console.log('Disposing previous hologram...');
                 starMapHologram.dispose();
@@ -2522,7 +2518,7 @@
             
             container.classList.add('active');
             
-            // Reset tooltip completely before creating new hologram
+            // Reset tooltip before creating new hologram
 			const tooltip = document.getElementById('star-tooltip');
 			if (tooltip) {
 				tooltip.classList.remove('visible', 'interactive');
@@ -2636,7 +2632,7 @@
             }
         }
 
-        // FIXED: Simplified closeStarMap function without problematic tooltip manipulation
+        // closeStarMap function without tooltip manipulation
         function closeStarMap() {
 			const container = document.getElementById('star-map-container');
 			const flashOverlay = document.getElementById('flash-overlay');
