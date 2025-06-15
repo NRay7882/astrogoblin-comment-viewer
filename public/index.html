@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Astrogoblin Comment Shop Picker</title>
+    <title>Astrogoblin Comment Shop Picker (local testing)</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -2335,6 +2335,13 @@
         window.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             
+            // Handle session from OAuth callback
+            if (urlParams.get('session')) {
+                sessionId = urlParams.get('session');
+                localStorage.setItem('session-id', sessionId);
+                console.log('Session ID received from OAuth:', sessionId);
+            }
+            
             if (urlParams.get('authenticated') === 'true') {
                 setAuthenticatedState(true);
                 showStatus('✅ Successfully connected to Patreon!', 'success');
@@ -2346,9 +2353,25 @@
             checkAuthStatus();
         });
 
+        // Session management
+        let sessionId = localStorage.getItem('session-id');
+        if (!sessionId) {
+            sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('session-id', sessionId);
+        }
+
+        function getSessionHeaders() {
+            return {
+                'x-session-id': sessionId,
+                'Content-Type': 'application/json'
+            };
+        }
+
         async function checkAuthStatus() {
             try {
-                const response = await fetch('/api/health');
+                const response = await fetch('/api/health', {
+                    headers: { 'x-session-id': sessionId }
+                });
                 const data = await response.json();
                 if (data.authenticated) {
                     setAuthenticatedState(true);
@@ -2361,7 +2384,7 @@
         function connectPatreon() {
             console.log('connectPatreon function called!');
             showStatus('Redirecting to Patreon...', 'loading');
-            window.location.href = '/auth/patreon';
+            window.location.href = `/auth/patreon?session=${sessionId}`;
         }
 
         async function setAuthenticatedState(authenticated) {
@@ -2373,7 +2396,9 @@
 
             if (authenticated) {
                 try {
-                    const response = await fetch('/api/user-info');
+                    const response = await fetch('/api/user-info', {
+                        headers: { 'x-session-id': sessionId }
+                    });
                     if (response.ok) {
                         const userData = await response.json();
                         authStatus.textContent = `✅ Authenticated with Patreon (${userData.username})`;
@@ -2416,7 +2441,7 @@
             try {
                 const response = await fetch('/api/extract-post', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getSessionHeaders(),
                     body: JSON.stringify({ postUrl })
                 });
 

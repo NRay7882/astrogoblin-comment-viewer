@@ -36,7 +36,26 @@ console.log(`   PORT: ${PORT}`);
 
 const patreonOAuth = patreon.oauth;
 
-let userTokens = {};
+// Session storage for user tokens
+const userSessions = new Map();
+
+// Ensure session ID
+app.use((req, res, next) => {
+    if (!req.headers['x-session-id']) {
+        // Generate a simple session ID for this request
+        req.sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        res.setHeader('x-session-id', req.sessionId);
+    } else {
+        req.sessionId = req.headers['x-session-id'];
+    }
+    
+    // Initialize session if it doesn't exist
+    if (!userSessions.has(req.sessionId)) {
+        userSessions.set(req.sessionId, {});
+    }
+    
+    next();
+});
 
 // Serve the main page
 app.get('/', (req, res) => {
@@ -45,14 +64,23 @@ app.get('/', (req, res) => {
 
 // Step 1: Redirect to Patreon for authentication
 app.get('/auth/patreon', (req, res) => {
-    const authUrl = `https://www.patreon.com/oauth2/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=identity campaigns campaigns.posts`;
+    // Use session ID from query, request, or create new one
+    const sessionId = req.query.session || req.sessionId || ('session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9));
+    const authUrl = `https://www.patreon.com/oauth2/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=identity campaigns campaigns.posts&state=${sessionId}`;
     console.log('Redirecting to:', authUrl);
     res.redirect(authUrl);
 });
 
 // Step 2: Handle the callback from Patreon
 app.get('/oauth/callback', async (req, res) => {
-    const { code, error } = req.query;
+    const { code, error, state } = req.query;
+    
+    // Extract session ID from state parameter or create new one
+    let sessionId = state;
+    if (!sessionId) {
+        sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+    req.sessionId = sessionId;
     
     if (error) {
         console.error('OAuth error:', error);
@@ -76,11 +104,13 @@ app.get('/oauth/callback', async (req, res) => {
             refresh_token: tokens.refresh_token ? '✓ Present' : '✗ Missing'
         });
 
-        // Store tokens
-        userTokens.access_token = tokens.access_token;
-        userTokens.refresh_token = tokens.refresh_token;
+        // Store tokens in session
+        const sessionData = userSessions.get(req.sessionId) || {};
+        sessionData.access_token = tokens.access_token;
+        sessionData.refresh_token = tokens.refresh_token;
+        userSessions.set(req.sessionId, sessionData);
         
-        res.redirect('/?authenticated=true');
+        res.redirect(`/?authenticated=true&session=${sessionId}`);
     } catch (error) {
         console.error('Token exchange error:', error);
         res.redirect('/?error=token_exchange_failed');
@@ -91,7 +121,13 @@ app.get('/oauth/callback', async (req, res) => {
 app.post('/api/extract-post', async (req, res) => {
     const { postUrl } = req.body;
     
-    if (!userTokens.access_token) {
+    console.log('Extract request - Session ID:', req.sessionId);
+    console.log('Available sessions:', Array.from(userSessions.keys()));
+    
+    const sessionData = userSessions.get(req.sessionId) || {};
+    console.log('Session data:', { hasToken: !!sessionData.access_token });
+    
+    if (!sessionData.access_token) {
         return res.status(401).json({ error: 'Not authenticated. Please connect with Patreon first.' });
     }
     
@@ -118,7 +154,7 @@ app.post('/api/extract-post', async (req, res) => {
         
         const postResponse = await fetch(postApiUrl, {
             headers: {
-                'Authorization': `Bearer ${userTokens.access_token}`,
+                'Authorization': `Bearer ${sessionData.access_token}`,
                 'User-Agent': 'CommentFeeder - Comment Extractor'
             }
         });
@@ -155,7 +191,7 @@ app.post('/api/extract-post', async (req, res) => {
                 
                 const commentsResponse = await fetch(endpoint, {
                     headers: {
-                        'Authorization': `Bearer ${userTokens.access_token}`,
+                        'Authorization': `Bearer ${sessionData.access_token}`,
                         'User-Agent': 'CommentFeeder - Comment Extractor'
                     }
                 });
@@ -289,14 +325,18 @@ app.post('/api/extract-post', async (req, res) => {
 
 // Get current user info
 app.get('/api/user-info', async (req, res) => {
-    if (!userTokens.access_token) {
+    console.log('User info request - Session ID:', req.sessionId);
+    const sessionData = userSessions.get(req.sessionId) || {};
+    console.log('User info session data:', { hasToken: !!sessionData.access_token });
+    
+    if (!sessionData.access_token) {
         return res.status(401).json({ error: 'Not authenticated' });
     }
     
     try {
         const identityResponse = await fetch('https://www.patreon.com/api/oauth2/v2/identity?fields[user]=full_name', {
             headers: {
-                'Authorization': `Bearer ${userTokens.access_token}`,
+                'Authorization': `Bearer ${sessionData.access_token}`,
                 'User-Agent': 'CommentFeeder - User Info'
             }
         });
@@ -329,9 +369,10 @@ if (process.env.NODE_ENV === 'production') {
 
 // Health check
 app.get('/api/health', (req, res) => {
+    const sessionData = userSessions.get(req.sessionId) || {};
     res.json({ 
         status: 'ok', 
-        authenticated: !!userTokens.access_token,
+        authenticated: !!sessionData.access_token,
         timestamp: new Date().toISOString()
     });
 });
