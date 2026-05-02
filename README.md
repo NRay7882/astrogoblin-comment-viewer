@@ -4,7 +4,7 @@
 
 A Patreon comment viewer with a Star Wars-style holographic projection display, originally built for the [Astrogoblin](https://www.patreon.com/c/Astrogoblin) community. Patreon creators can authenticate with their account, paste a post URL, and view comments rendered in a 3D holoprojection effect.
 
-Built with Node 25.2.1 & npm 11.6.2
+Built with Node 25.9.0 & npm 11.12.1
 
 ## Features
 
@@ -62,11 +62,11 @@ nvm version
 
 ### 2. Install Node.js
 
-Once nvm is installed, install and activate a Node.js version (v18 or higher required):
+Once nvm is installed, install and activate a Node.js version (25.9.0 was used):
 
 ```bash
-nvm install 22
-nvm use 22
+nvm install 25.9.0
+nvm use 25.9.0
 ```
 
 Verify both Node.js and npm are available:
