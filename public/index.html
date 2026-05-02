@@ -981,9 +981,67 @@
 		.faq-answer a:hover {
 			text-decoration: underline;
 		}
+
+		/* Shutdown Notice Banner */
+		.shutdown-banner {
+			background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+			border: 2px solid #e94560;
+			border-radius: 10px;
+			padding: 24px 30px;
+			margin-bottom: 20px;
+			text-align: center;
+			box-shadow: 0 4px 20px rgba(233, 69, 96, 0.3);
+			position: relative;
+			overflow: hidden;
+		}
+		.shutdown-banner::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 200%;
+			height: 2px;
+			background: linear-gradient(90deg, transparent, #e94560, transparent);
+			animation: scanline 3s linear infinite;
+		}
+		@keyframes scanline {
+			0% { left: -100%; }
+			100% { left: 100%; }
+		}
+		.shutdown-banner h2 {
+			color: #e94560;
+			margin: 0 0 12px 0;
+			font-size: 1.3em;
+			letter-spacing: 1px;
+			text-transform: uppercase;
+		}
+		.shutdown-banner p {
+			color: #a8b2d1;
+			margin: 8px 0;
+			font-size: 0.95em;
+			line-height: 1.6;
+		}
+		.shutdown-banner a {
+			color: #64ffda;
+			text-decoration: none;
+			word-break: break-all;
+		}
+		.shutdown-banner a:hover {
+			text-decoration: underline;
+		}
+		.shutdown-banner .shutdown-date {
+			color: #e94560;
+			font-weight: bold;
+		}
     </style>
 </head>
 <body>
+    <div class="shutdown-banner">
+        <p>This site will be shut down on <span class="shutdown-date">Saturday, June 6th, 2026</span>.</p>
+        <p><strong style="color: #ccd6f6;">The source code is available at:</strong><br>
+        <a href="https://github.com/NRay7882/astrogoblin-comment-viewer">https://github.com/NRay7882/astrogoblin-comment-viewer</a></p>
+    </div>
+
     <div class="container">
         <h1>Astrogoblin Comment Shop Picker</h1>
         
@@ -1028,7 +1086,7 @@
         <h3 style="color: #ff6b35; margin-top: 25px; margin-bottom: 10px;">Features</h3>
         <ul style="line-height: 1.8; color: #333;">
             <li>🌟 <strong>Interactive 3D Galaxy:</strong> Comments rendered as stars in a rotatable holographic projection</li>
-            <li>📏 <strong>Visual Engagement:</strong> Star size scales with comment likes—popular comments shine brighter</li>
+            <li>📏 <strong>Visual Engagement:</strong> Star size scales with comment likes-popular comments shine brighter</li>
             <li>💾 <strong>Save & Track:</strong> Mark important comments with a golden glow and track which you've read</li>
             <li>📊 <strong>Export Data:</strong> See all comments on one page or download them as a JSON file</li>
         </ul>
