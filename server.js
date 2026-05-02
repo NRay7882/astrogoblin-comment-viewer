@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const patreon = require('patreon');
 const cors = require('cors');
 const path = require('path');
 
@@ -33,8 +32,6 @@ console.log(`   CLIENT_ID: ${CLIENT_ID ? '✓ Set' : '❌ Missing'}`);
 console.log(`   CLIENT_SECRET: ${CLIENT_SECRET ? '✓ Set' : '❌ Missing'}`);
 console.log(`   REDIRECT_URI: ${REDIRECT_URI}`);
 console.log(`   PORT: ${PORT}`);
-
-const patreonOAuth = patreon.oauth;
 
 // Session storage for user tokens
 const userSessions = new Map();
@@ -96,8 +93,24 @@ app.get('/oauth/callback', async (req, res) => {
         console.log('Received auth code:', code);
         
         // Exchange code for tokens
-        const oauthClient = patreonOAuth(CLIENT_ID, CLIENT_SECRET);
-        const tokens = await oauthClient.getTokens(code, REDIRECT_URI);
+        const tokenResponse = await fetch('https://www.patreon.com/api/oauth2/token', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+			body: new URLSearchParams({
+				code,
+				grant_type: 'authorization_code',
+				client_id: CLIENT_ID,
+				client_secret: CLIENT_SECRET,
+				redirect_uri: REDIRECT_URI
+			})
+		});
+
+		if (!tokenResponse.ok) {
+			const errorText = await tokenResponse.text();
+			throw new Error(`Token exchange failed: ${tokenResponse.status} ${errorText}`);
+		}
+
+		const tokens = await tokenResponse.json();
         
         console.log('Received tokens:', {
             access_token: tokens.access_token ? '✓ Present' : '✗ Missing',
